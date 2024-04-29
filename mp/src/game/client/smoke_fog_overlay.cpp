@@ -22,6 +22,7 @@
 
 static IMaterial *g_pSmokeFogMaterial = NULL;
 
+
 float		g_SmokeFogOverlayAlpha;
 Vector		g_SmokeFogOverlayColor;
 #ifdef NEO

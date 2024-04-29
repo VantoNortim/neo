@@ -87,6 +87,9 @@
 #include "ihudlcd.h"
 #include "toolframework_client.h"
 #include "hltvcamera.h"
+#ifdef SDK2013CE
+#include "shaderapihack.h"
+#endif
 #if defined( REPLAY_ENABLED )
 #include "replay/replaycamera.h"
 #include "replay/replay_ragdoll.h"
@@ -340,12 +343,26 @@ static ConVar s_cl_class("cl_class", "default", FCVAR_USERINFO|FCVAR_ARCHIVE, "D
 static ConVar s_cl_load_hl1_content("cl_load_hl1_content", "0", FCVAR_ARCHIVE, "Mount the content from Half-Life: Source if possible");
 #endif
 
+
 // Physics system
 bool g_bLevelInitialized;
 bool g_bTextMode = false;
 class IClientPurchaseInterfaceV2 *g_pClientPurchaseInterface = (class IClientPurchaseInterfaceV2 *)(&g_bTextMode + 156);
 
 static ConVar *g_pcv_ThreadMode = NULL;
+
+#ifdef SDK2013CE
+void ApplyShaderConstantHack()
+{
+	CMaterialConfigWrapper Wrapper;
+
+	Wrapper.PrintPixelConstants();
+	Wrapper.SetNumPixelConstants(254);
+	Wrapper.SetNumBooleanPixelConstants(16);
+	Wrapper.SetNumIntegerPixelConstants(16);
+	Wrapper.PrintPixelConstants();
+}
+#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: interface for gameui to modify voice bans
@@ -1016,8 +1033,12 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 	IGameSystem::Add( ClientSoundscapeSystem() );
 	IGameSystem::Add( PerfVisualBenchmark() );
 	IGameSystem::Add( MumbleSystem() );
-	
-	#if defined( TF_CLIENT_DLL )
+
+#ifdef SDK2013CE
+	ApplyShaderConstantHack();
+#endif
+
+#if defined( TF_CLIENT_DLL )
 	IGameSystem::Add( CustomTextureToolCacheGameSystem() );
 	IGameSystem::Add( TFSharedContentManager() );
 	#endif
@@ -1249,7 +1270,7 @@ void CHLClient::PostInit()
 	else
 	{
 		Assert(false);
-	}
+}
 #endif
 }
 

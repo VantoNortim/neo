@@ -1627,13 +1627,13 @@ int CBasePlayer::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 			Vector force = vecDir * -DamageForce(WorldAlignSize(), info.GetBaseDamage());
 			if (force.z > 250.0f)
 			{
-				force.z = 250.0f;
-			}
+			force.z = 250.0f;
+		}
 #ifdef NEO
 			force *= sv_neo_bullet_physforce_scale.GetFloat();
 #endif
 			ApplyAbsVelocityImpulse(force);
-		}
+	}
 	}
 
 	// fire global game event
@@ -2889,6 +2889,12 @@ float CBasePlayer::GetHeldObjectMass( IPhysicsObject *pHeldObject )
 	return 0;
 }
 
+#ifdef SDK2013CE
+CBaseEntity	*CBasePlayer::GetHeldObject( void )
+{
+	return NULL;
+}
+#endif // SDK2013CE
 
 //-----------------------------------------------------------------------------
 // Purpose:	Server side of jumping rules.  Most jumping logic is already
@@ -6051,7 +6057,11 @@ static void CreateJalopy( CBasePlayer *pPlayer )
 	// Cheat to create a jeep in front of the player
 	Vector vecForward;
 	AngleVectors( pPlayer->EyeAngles(), &vecForward );
-	CBaseEntity *pJeep = (CBaseEntity *)CreateEntityByName( "prop_vehicle_jeep" );
+#ifdef SDK2013CE
+	CBaseEntity *pJeep = (CBaseEntity *)CreateEntityByName( "prop_vehicle_jalopy" );
+#else
+	CBaseEntity* pJeep = (CBaseEntity *)CreateEntityByName( "prop_vehicle_jeep" );
+#endif // SDK2013CE
 	if ( pJeep )
 	{
 		Vector vecOrigin = pPlayer->GetAbsOrigin() + vecForward * 256 + Vector(0,0,64);
@@ -6060,7 +6070,11 @@ static void CreateJalopy( CBasePlayer *pPlayer )
 		pJeep->SetAbsAngles( vecAngles );
 		pJeep->KeyValue( "model", "models/vehicle.mdl" );
 		pJeep->KeyValue( "solid", "6" );
-		pJeep->KeyValue( "targetname", "jeep" );
+#ifdef SDK2013CE
+		pJeep->KeyValue( "targetname", "jalopy" );
+#else
+		pJeep->KeyValue("targetname", "jeep");
+#endif // SDK2013CE
 		pJeep->KeyValue( "vehiclescript", "scripts/vehicles/jalopy.txt" );
 		DispatchSpawn( pJeep );
 		pJeep->Activate();

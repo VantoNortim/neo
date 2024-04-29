@@ -34,7 +34,7 @@ public:
 	
 	const Vector& GetRecoilDirection() const { return m_vecRecoilDirection; }
 
-	void GetSpreadAndRecoilDirections(Vector& outSpreadDir, Vector& outRecoilDir) const
+	void GetSpreadAndRecoilDirections(Vector& outSpreadDir, Vector& outRecoilDir)
 	{
 		outSpreadDir = GetShotDirection();
 		outRecoilDir = GetRecoilDirection();

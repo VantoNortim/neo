@@ -1346,8 +1346,8 @@ Color CBaseHudChat::GetTextColorForClient( TextColor colorNum, int clientIndex )
 	default:
 		if (clientIndex == 0)
 		{
-			c = GetDefaultTextColor();
-		}
+		c = GetDefaultTextColor();
+	}
 		else
 		{
 			c = COLOR_NEO_ORANGE;

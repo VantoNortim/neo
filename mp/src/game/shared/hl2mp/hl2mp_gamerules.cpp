@@ -967,7 +967,7 @@ CAmmoDef *GetAmmoDef()
 	ConCommand cc_Bot("bot", Bot_f, "Add a bot.", FCVAR_CHEAT);
 #if defined(DEBUG) && !defined(NEO)
 	void Bot_f()
-	{
+	{		
 		// Look at -count.
 		int count = 1;
 		count = clamp( count, 1, 16 );

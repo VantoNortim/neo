@@ -289,7 +289,7 @@ bool CHL2GameMovement::OnLadder( trace_t &trace )
 	if (!GetLadder())
 	{
 		return BaseClass::OnLadder(trace);
-	}
+}
 
 	return true;
 #endif
@@ -1177,9 +1177,13 @@ bool CHL2GameMovement::CanAccelerate()
 	}
 #endif
 
+#ifdef SDK2013CE
+	return BaseClass::CanAccelerate();
+#else
 	BaseClass::CanAccelerate();
 
 	return true;
+#endif
 }
 
 

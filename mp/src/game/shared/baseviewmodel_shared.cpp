@@ -419,15 +419,16 @@ void CBaseViewModel::CalcViewModelView( CBasePlayer *owner, const Vector& eyePos
 		// Let the viewmodel shake at about 10% of the amplitude of the player's view
 		vieweffects->ApplyShake( vmorigin, vmangles, 0.1 );	
 	}
+#endif
 
 	if( UseVR() )
 	{
 		g_ClientVirtualReality.OverrideViewModelTransform( vmorigin, vmangles, pWeapon && pWeapon->ShouldUseLargeViewModelVROverride() );
 	}
-#endif
 
 	SetLocalOrigin( vmorigin );
 	SetLocalAngles( vmangles );
+#endif
 
 #ifdef SIXENSE
 	if( g_pSixenseInput->IsEnabled() && (owner->GetObserverMode()==OBS_MODE_NONE) && !UseVR() )
@@ -454,7 +455,6 @@ void CBaseViewModel::CalcViewModelView( CBasePlayer *owner, const Vector& eyePos
 
 		SetLocalAngles( vmangles );
 	}
-#endif
 #endif
 
 }

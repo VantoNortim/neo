@@ -73,6 +73,7 @@ itemFlags_t g_ItemFlags[8] =
 extern itemFlags_t g_ItemFlags[8];
 #endif
 
+
 static CUtlDict< FileWeaponInfo_t*, unsigned short > m_WeaponInfoDatabase;
 
 #ifdef _DEBUG

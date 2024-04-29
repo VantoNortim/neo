@@ -44,6 +44,7 @@ extern IFileSystem *filesystem;
 	static ConVar dispcoll_drawplane( "dispcoll_drawplane", "0" );
 #endif
 
+
 // tickcount currently isn't set during prediction, although gpGlobals->curtime and
 // gpGlobals->frametime are. We should probably set tickcount (to player->m_nTickBase),
 // but we're REALLY close to shipping, so we can change that later and people can use
@@ -761,12 +762,12 @@ Vector CGameMovement::GetPlayerMins( void ) const
 		if (player->GetViewOffset().y < 0)
 		{
 			mins.y += player->GetViewOffset().y;
-		}
+	}
 		return mins;
 #else
 		return player->m_Local.m_bDucked ? VEC_DUCK_HULL_MIN_SCALED(player) : VEC_HULL_MIN_SCALED(player);
 #endif
-	}
+}
 }
 
 //-----------------------------------------------------------------------------
@@ -789,12 +790,12 @@ Vector CGameMovement::GetPlayerMaxs( void ) const
 		if (player->GetViewOffset().y > 0)
 		{
 			maxs.y += player->GetViewOffset().y;
-		}
+	}
 		return maxs;
 #else
 		return player->m_Local.m_bDucked ? VEC_DUCK_HULL_MAX_SCALED(player) : VEC_HULL_MAX_SCALED(player);
 #endif
-	}
+}
 }
 
 //-----------------------------------------------------------------------------
@@ -1087,7 +1088,7 @@ void CGameMovement::CheckParameters( void )
 
 #ifdef NEO
 	if (player->GetFlags() & FL_FROZEN ||
-		player->GetFlags() & FL_ONTRAIN ||
+		 player->GetFlags() & FL_ONTRAIN || 
 		IsDead() ||
 		static_cast<CNEO_Player*>(player)->GetNeoFlags() & NEO_FL_FREEZETIME)
 #else
@@ -4106,12 +4107,12 @@ void CGameMovement::PlayerRoughLandingEffects( float fvol )
 		if (player->m_Local.m_vecPunchAngle[PITCH] > 8)
 		{
 			player->m_Local.m_vecPunchAngle.Set(PITCH, 8);
-	}
+		}
 
 #if !defined( CLIENT_DLL )
 		player->RumbleEffect((fvol > 0.85f) ? (RUMBLE_FALL_LONG) : (RUMBLE_FALL_SHORT), 0, RUMBLE_FLAGS_NONE);
 #endif
-}
+	}
 #endif
 }
 

@@ -306,7 +306,7 @@ void ClientModeShared::ReloadScheme( bool flushLowLevel )
 		KeyValuesSystem()->InvalidateCache();
 	}
 
-    m_pViewport->ReloadScheme( "resource/ClientScheme.res" );
+	m_pViewport->ReloadScheme( "resource/ClientScheme.res" );
 	ClearKeyValuesCache();
 }
 
@@ -1092,7 +1092,7 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 					if (oldteam != TEAM_UNASSIGNED && team != TEAM_SPECTATOR)
 					{
 						g_pVGuiLocalize->ConstructString(wszLocalized, sizeof(wszLocalized), g_pVGuiLocalize->Find("#game_player_joined_team"), 2, wszPlayerName, wszTeam);
-					}
+				}
 				}
 
 				if (weWantToChat)

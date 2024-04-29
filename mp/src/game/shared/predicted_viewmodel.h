@@ -29,9 +29,9 @@ public:
 
 	CPredictedViewModel( void );
 	virtual ~CPredictedViewModel( void );
-
+							
 	virtual void CalcViewModelLag( Vector& origin, QAngle& angles, QAngle& original_angles );
-	
+
 #if defined( CLIENT_DLL )
 	virtual bool ShouldPredict( void )
 	{
@@ -40,12 +40,14 @@ public:
 
 		return BaseClass::ShouldPredict();
 	}
-#endif
-	
-#if defined( CLIENT_DLL )
 
 	// This is used to lag the angles.
 	CInterpolatedVar<QAngle> m_LagAnglesHistory;
+#endif
+
+private:
+	
+#if defined( CLIENT_DLL )
 	QAngle m_vLagAngles;
 
 	CPredictedViewModel( const CPredictedViewModel & ); // not defined, not accessible

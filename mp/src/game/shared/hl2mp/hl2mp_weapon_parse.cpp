@@ -49,7 +49,7 @@ void CHL2MPSWeaponInfo::Parse( KeyValues *pKeyValuesData, const char *szWeaponNa
 		m_angVMAngOffset[PITCH] = pViewModel->GetFloat("pitch", 0);
 		m_angVMAngOffset[YAW] = pViewModel->GetFloat("yaw", 0);
 		m_angVMAngOffset[ROLL] = pViewModel->GetFloat("roll", 0);
-	}
+}
 
 	// NEO TODO (Rain): add optional ironsight offsets
 	// in addition to "traditional" NT aim

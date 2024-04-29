@@ -119,11 +119,13 @@ entities. Each one is useful under different conditions.
 #include "tier0/fasttimer.h"
 #include "utllinkedlist.h"
 #include "utldict.h"
-#ifdef WIN32
-#include <typeinfo.h>
+#ifdef SDK2013CE
+#include <typeinfo>
 #else
 #include <typeinfo>
 #endif
+#endif // SDK2013CE
+
 #include "tier1/utlintrusivelist.h"
 #include "tier1/utlstring.h"
 
@@ -912,8 +914,3 @@ inline void SwapParticles( Particle *pPrev, Particle *pCur )
 
 
 #include "particle_iterators.h"
-
-
-#endif
-
-

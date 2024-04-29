@@ -69,8 +69,6 @@ private:
 	bool				ImpactWater(const Vector& start, const Vector& end);
 	void				Hit(trace_t& traceHit, Activity nHitActivity);
 #endif
-
-private:
 };
 
 #endif

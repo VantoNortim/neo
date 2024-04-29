@@ -79,7 +79,12 @@ public:
 	QAngle	m_angRotation;
 	Vector	m_vOriginVelocity;
 	int		m_nLastFramecount : 31;
-	int		m_bAnglesComputed : 1;
+#ifdef SDK2013CE
+	bool	m_bAnglesComputed : 1;
+#else	
+	int		m_bAnglesComputed : 2; // Was 1 previously, this fixes a warning that assigned value is out of range (something to do with the sign bit of the value) NEO FIXME
+#endif // SDK2013CE
+
 };
 
 

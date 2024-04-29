@@ -752,7 +752,7 @@ void CViewRender::SetUpViews()
 	//  closest point of approach seems to be view center to top of crouched box
 	view.zNear			    = GetZNear();
 	view.zNearViewmodel	    = 1;
-	view.fov = default_fov.GetFloat();
+	view.fov				= default_fov.GetFloat();
 
 	view.m_bOrtho			= false;
     view.m_bViewToProjectionOverride = false;
@@ -840,7 +840,11 @@ void CViewRender::SetUpViews()
 	view.fovViewmodel = g_pClientMode->GetViewModelFOV();
 #else
 	//Adjust the viewmodel's FOV to move with any FOV offsets on the viewer's end
+#ifdef SDK2013CE
+	view.fovViewmodel = fabs( g_pClientMode->GetViewModelFOV() - flFOVOffset );
+#else
 	view.fovViewmodel = g_pClientMode->GetViewModelFOV() - flFOVOffset;
+#endif
 #endif
 
 	if ( UseVR() )
@@ -1458,4 +1462,3 @@ CON_COMMAND( getpos, "dump position and angles to the console" )
 	Warning( "%s %f %f %f;", pCommand1, vecOrigin.x, vecOrigin.y, vecOrigin.z );
 	Warning( "%s %f %f %f\n", pCommand2, angles.x, angles.y, angles.z );
 }
-

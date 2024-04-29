@@ -319,8 +319,8 @@ void CHudCrosshair::Paint( void )
 	int iHeight = (int)(flHeight + 0.5f);
 	int iX = (int)(x + 0.5f);
 	int iY = (int)(y + 0.5f);
-	Color clr = m_clrCrosshair;
 #endif
+	Color clr = m_clrCrosshair;
 
 	float flWidth = flWeaponScale_X * (float)iTextureW;
 	float flHeight = flWeaponScale_Y * (float)iTextureH;

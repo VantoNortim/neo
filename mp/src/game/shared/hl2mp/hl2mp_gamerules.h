@@ -121,7 +121,6 @@ public:
 	const HL2MPViewVectors* GetHL2MPViewVectors() const;
 
 	float GetMapRemainingTime();
-
 	void CheckRestartGame();
 
 #if defined(NEO) && defined(GAME_DLL)
@@ -131,7 +130,7 @@ public:
 	void RestartGame();
 	void CleanUpMap();
 #endif
-
+	
 #ifndef CLIENT_DLL
 	virtual Vector VecItemRespawnSpot( CItem *pItem );
 	virtual QAngle VecItemRespawnAngles( CItem *pItem );
@@ -170,11 +169,11 @@ public:
 		return m_bTeamPlayEnabled;
 #endif
 	}
-
+	
 	void	CheckAllPlayersReady( void );
 
 	virtual bool IsConnectedUserInfoChangeAllowed( CBasePlayer *pPlayer );
-
+	
 #ifdef NEO
 protected:
 	CNetworkVar(float, m_flGameStartTime);
@@ -182,7 +181,7 @@ protected:
 private:
 	CNetworkVar(float, m_flGameStartTime);
 #endif
-
+	
 private:
 	CNetworkVar( bool, m_bTeamPlayEnabled );
 	CUtlVector<EHANDLE> m_hRespawnableItemsAndWeapons;

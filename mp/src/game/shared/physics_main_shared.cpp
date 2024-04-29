@@ -2201,6 +2201,7 @@ void CBaseEntity::EndGroundContact( CBaseEntity *ground )
 	//Msg( "--- %s ending contact with ground %s\n", GetClassname(), ground->GetClassname() );
 }
 
+
 void CBaseEntity::SetGroundChangeTime( float flTime )
 {
 	m_flGroundChangeTime = flTime;

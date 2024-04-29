@@ -57,7 +57,7 @@ bool CBaseCombatCharacter::Weapon_Switch( CBaseCombatWeapon *pWeapon, int viewmo
 	{
 		if ( !m_hActiveWeapon->Holster( pWeapon ) ) {
 			return false;
-		}
+	}
 	}
 
 	m_hActiveWeapon = pWeapon;
@@ -89,7 +89,7 @@ bool CBaseCombatCharacter::Weapon_CanSwitchTo( CBaseCombatWeapon *pWeapon )
 	if ( !pWeapon->CanDeploy() ) {
 		return false;
 	}
-
+	
 	if ( m_hActiveWeapon )
 	{
 		if ( !m_hActiveWeapon->CanHolster() && !pWeapon->ForceWeaponSwitch() ) {
@@ -111,6 +111,7 @@ bool CBaseCombatCharacter::Weapon_CanSwitchTo( CBaseCombatWeapon *pWeapon )
 			}
 		}
 	}
+
 	return true;
 }
 

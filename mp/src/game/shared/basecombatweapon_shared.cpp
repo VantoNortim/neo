@@ -336,8 +336,8 @@ const char *CBaseCombatWeapon::GetViewModel( int /*viewmodelindex = 0 -- this is
 
 	if (!owner)
 	{
-		return GetWpnData().szViewModel;
-	}
+	return GetWpnData().szViewModel;
+}
 
 	return owner->GetTeamNumber() == TEAM_JINRAI ?
 		GetWpnData().szViewModel : GetWpnData().szViewModel2;
@@ -2142,7 +2142,7 @@ void CBaseCombatWeapon::AddViewKick( void )
 //-----------------------------------------------------------------------------
 // Purpose: Get the string to print death notices with
 //-----------------------------------------------------------------------------
-char *CBaseCombatWeapon::GetDeathNoticeName( void )
+const char *CBaseCombatWeapon::GetDeathNoticeName( void )
 {
 #if !defined( CLIENT_DLL )
 	return (char*)STRING( m_iszName );
@@ -2612,6 +2612,7 @@ void CDmgAccumulator::Process( void )
 #if defined( CLIENT_DLL )
 
 BEGIN_PREDICTION_DATA( CBaseCombatWeapon )
+
 	DEFINE_PRED_FIELD( m_nNextThinkTick, FIELD_INTEGER, FTYPEDESC_INSENDTABLE ),
 	// Networked
 	DEFINE_PRED_FIELD( m_hOwner, FIELD_EHANDLE, FTYPEDESC_INSENDTABLE ),
@@ -2675,6 +2676,7 @@ IMPLEMENT_NETWORKCLASS_ALIASED( BaseCombatWeapon, DT_BaseCombatWeapon )
 // Purpose: Save Data for Base Weapon object
 //-----------------------------------------------------------------------------// 
 BEGIN_DATADESC( CBaseCombatWeapon )
+
 	DEFINE_FIELD( m_flNextPrimaryAttack, FIELD_TIME ),
 	DEFINE_FIELD( m_flNextSecondaryAttack, FIELD_TIME ),
 	DEFINE_FIELD( m_flTimeWeaponIdle, FIELD_TIME ),

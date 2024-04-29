@@ -120,7 +120,7 @@ const char *GetGameDescription()
 	else
 	{
 		return "Half-Life 2 Deathmatch";
-	}
+}
 }
 
 //-----------------------------------------------------------------------------

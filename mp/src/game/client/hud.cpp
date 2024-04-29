@@ -163,6 +163,7 @@ vgui::HFont g_hFontKillfeed = vgui::INVALID_FONT;
 vgui::HFont g_hFontJoinMenus = vgui::INVALID_FONT;
 #endif
 
+
 //=======================================================================================================================
 // Hud Element Visibility handling
 //=======================================================================================================================
@@ -507,7 +508,7 @@ void CHud::InitFonts()
 	{
 		Assert(false);
 		g_hFontKillfeed = g_hFontTrebuchet24;
-	}
+}
 #endif
 }
 
