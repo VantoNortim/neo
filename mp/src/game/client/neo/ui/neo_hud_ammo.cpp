@@ -14,6 +14,7 @@
 #include "ienginevgui.h"
 
 #include "neo_hud_elements.h"
+#include "inttostr.h"
 
 #include "ammodef.h"
 
@@ -151,7 +152,7 @@ void CNEOHud_Ammo::DrawAmmo() const
 		
 		const int maxLen = 4; // support a max of '999' clips, plus '\0'
 		char clipsText[maxLen]{ '\0' };
-		itoa(strcmp(wepName, "MURATA SUPA 7") == 0 ? ammoCount : numClips, clipsText, 10); // If using the Supa7, display total ammo instead of total ammo/size of internal magazine
+		inttostr(strcmp(wepName, "MURATA SUPA 7") == 0 ? ammoCount : numClips, clipsText, 10); // If using the Supa7, display total ammo instead of total ammo/size of internal magazine
 		textLen = V_strlen(clipsText);
 		wchar_t unicodeClipsText[maxLen]{ L'\0' };
 		g_pVGuiLocalize->ConvertANSIToUnicode(clipsText, unicodeClipsText, sizeof(unicodeClipsText));
