@@ -106,7 +106,7 @@ CNeoTeamMenu::CNeoTeamMenu(IViewPort *pViewPort)
 	SetVisible(false);
 	SetProportional(false);
 	SetMouseInputEnabled(true);
-	SetKeyBoardInputEnabled(true);
+	//SetKeyBoardInputEnabled(true);
 	SetTitleBarVisible(false);
 
 	FindButtons();
@@ -180,6 +180,13 @@ void CNeoTeamMenu::OnCommand(const char *command)
 
 	if (Q_strcmp(commandBuffer, "jointeam 1") == 0)
 	{ // joining spectators
+		ChangeMenu(NULL);
+		engine->ClientCmd(commandBuffer);
+		return;
+	}
+
+	if (Q_strcmp(commandBuffer, "jointeam 0") == 0)
+	{ // joining unnasigned
 		ChangeMenu(NULL);
 		engine->ClientCmd(commandBuffer);
 		return;
