@@ -1,0 +1,3 @@
+// Maps tha immediately crash
+nt_bullet_tdm
+nt_shrine_ctg
