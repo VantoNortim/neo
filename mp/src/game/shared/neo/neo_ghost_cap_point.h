@@ -23,6 +23,7 @@
 #include "tier3/tier3.h"
 #include "vphysics_interface.h"
 #include "c_neo_player.h"
+#include "ienginevgui.h"
 #endif
 
 #ifdef CLIENT_DLL
@@ -72,12 +73,13 @@ public:
 		SetBounds(0, 0, m_iPosX, m_iPosY);
 
 		// NEO HACK (Rain): this is kind of awkward, we should get the handle on ApplySchemeSettings
-		vgui::IScheme *scheme = vgui::scheme()->GetIScheme(vgui::scheme()->GetDefaultScheme());
+		vgui::HScheme neoscheme = vgui::scheme()->LoadSchemeFromFileEx(
+			enginevgui->GetPanel(PANEL_CLIENTDLL), "resource/ClientScheme_Neo.res", "ClientScheme_Neo");
+		SetScheme(neoscheme);
+		vgui::IScheme *scheme = vgui::scheme()->GetIScheme(neoscheme);
 		Assert(scheme);
 
-		m_hFont = scheme->GetFont("DefaultVerySmall", true);
-		const int fontTall = vgui::surface()->GetFontTall(m_hFont);
-		vgui::surface()->SetFontGlyphSet(m_hFont, "DefaultVerySmall", fontTall, 1000, 0, 0, vgui::ISurface::FONTFLAG_ANTIALIAS);
+		m_hFont = scheme->GetFont("NHudOCRSmall", true);
 
 		m_hCapTex = vgui::surface()->CreateNewTextureID();
 		Assert(m_hCapTex > 0);
