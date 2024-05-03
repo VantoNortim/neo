@@ -19,7 +19,11 @@
 #include <vgui_controls/Controls.h>
 #include <vgui_controls/Panel.h>
 
+#include <vgui/ILocalize.h>
+#include "tier3/tier3.h"
+#include "vphysics_interface.h"
 #include "c_neo_player.h"
+#include "ienginevgui.h"
 #endif
 
 #ifdef CLIENT_DLL
@@ -69,10 +73,13 @@ public:
 		SetBounds(0, 0, m_iPosX, m_iPosY);
 
 		// NEO HACK (Rain): this is kind of awkward, we should get the handle on ApplySchemeSettings
-		vgui::IScheme *scheme = vgui::scheme()->GetIScheme(vgui::scheme()->GetDefaultScheme());
+		vgui::HScheme neoscheme = vgui::scheme()->LoadSchemeFromFileEx(
+			enginevgui->GetPanel(PANEL_CLIENTDLL), "resource/ClientScheme_Neo.res", "ClientScheme_Neo");
+		SetScheme(neoscheme);
+		vgui::IScheme *scheme = vgui::scheme()->GetIScheme(neoscheme);
 		Assert(scheme);
 
-		m_hFont = scheme->GetFont("Default", true);
+		m_hFont = scheme->GetFont("NHudOCRSmall", true);
 
 		m_hCapTex = vgui::surface()->CreateNewTextureID();
 		Assert(m_hCapTex > 0);
@@ -95,7 +102,8 @@ public:
 		const bool alternate = NEORules()->roundAlternate();
 		const Color* targetColor = (m_iMyTeam == TEAM_JINRAI) ? (alternate ? &jinColor : &nsfColor) : (alternate ? &nsfColor : &jinColor);
 
-		if (player->GetTeamNumber() == TEAM_JINRAI || player->GetTeamNumber() == TEAM_NSF)
+		const bool playerIsPlaying = (player->GetTeamNumber() == TEAM_JINRAI || player->GetTeamNumber() == TEAM_NSF);
+		if (playerIsPlaying)
 		{
 			bool targetIsToDefend = player->GetTeamNumber() != m_iMyTeam;
 			if (!alternate)
@@ -129,6 +137,27 @@ public:
 			offset_Y,
 			offset_X + (m_iCapTexWidth * scale),
 			offset_Y + (m_iCapTexHeight * scale));
+
+#ifdef CLIENT_DLL
+		if (playerIsPlaying)
+		{
+			const float distance = METERS_PER_INCH * player->GetAbsOrigin().DistTo(m_vecMyPos);
+			if (distance > 0.2)
+			{
+				// TODO (nullsystem): None of this is particularly efficient, but it works so
+				V_snprintf(m_szMarkerText, sizeof(m_szMarkerText), "RETRIEVAL ZONE DISTANCE: %.0f m", distance);
+				g_pVGuiLocalize->ConvertANSIToUnicode(m_szMarkerText, m_wszMarkerTextUnicode, sizeof(m_wszMarkerTextUnicode));
+
+				int xWide = 0;
+				int yTall = 0;
+				vgui::surface()->GetTextSize(m_hFont, m_wszMarkerTextUnicode, xWide, yTall);
+				vgui::surface()->DrawSetTextColor(COLOR_TINTGREY);
+				vgui::surface()->DrawSetTextFont(m_hFont);
+				vgui::surface()->DrawSetTextPos(x - (xWide / 2), offset_Y + (m_iCapTexHeight * scale) + (yTall / 2));
+				vgui::surface()->DrawPrintText(m_wszMarkerTextUnicode, sizeof(m_szMarkerText));
+			}
+		}
+#endif
 	}
 
 	void SetTeam(int team) { m_iMyTeam = team; }
@@ -143,6 +172,9 @@ private:
 
 	int m_iMyTeam;
 	int m_flMyRadius;
+
+	char m_szMarkerText[64 + 1];
+	wchar_t m_wszMarkerTextUnicode[64 + 1];
 
 	Vector m_vecMyPos;
 
