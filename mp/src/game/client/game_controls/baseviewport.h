@@ -112,7 +112,7 @@ protected:
 			BaseClass::PerformLayout();
 		}
 
-		virtual void OnMousePressed(MouseCode code) { }// don't respond to mouse clicks
+		virtual void OnMousePressed(vgui::MouseCode code) { }// don't respond to mouse clicks
 		virtual vgui::VPANEL IsWithinTraverse( int x, int y, bool traversePopups )
 		{
 			return ( vgui::VPANEL )0;
