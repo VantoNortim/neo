@@ -60,6 +60,9 @@ void CHudSuitPower::Reset( void )
 //-----------------------------------------------------------------------------
 bool CHudSuitPower::ShouldDraw()
 {
+#ifdef NEO
+	return false;
+#endif
 	bool bNeedsDraw = false;
 
 	C_BaseHLPlayer *pPlayer = (C_BaseHLPlayer *)C_BasePlayer::GetLocalPlayer();
