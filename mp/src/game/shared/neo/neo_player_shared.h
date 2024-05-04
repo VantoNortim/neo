@@ -261,7 +261,6 @@ enum NeoWeponAimToggleE {
 
 extern ConVar cl_aimhold;
 
-#endif // NEO_PLAYER_SHARED_H
 enum NeoLeanDirectionE {
 	NEO_LEAN_NONE = 0,
 	NEO_LEAN_LEFT,
