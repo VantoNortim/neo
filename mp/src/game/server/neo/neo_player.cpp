@@ -1461,7 +1461,7 @@ void CNEO_Player::Event_Killed( const CTakeDamageInfo &info )
 		}
 	}
 
-	m_bEnterObserver = true;
+	SetObserverMode(OBS_MODE_CHASE);
 	ShowViewPortPanel(PANEL_SPECGUI, true);
 
 	BaseClass::Event_Killed(info);
@@ -1889,7 +1889,7 @@ ReturnSpot:
 
 bool CNEO_Player::StartObserverMode(int mode)
 {
-	return BaseClass::StartObserverMode(OBS_MODE_IN_EYE); // Hardcode this for now, dead players can't ghost
+	return BaseClass::StartObserverMode(OBS_MODE_CHASE);
 }
 
 void CNEO_Player::StopObserverMode()
