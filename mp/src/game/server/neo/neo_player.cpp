@@ -52,6 +52,7 @@ SendPropInt(SENDINFO(m_iCapTeam), 3),
 SendPropInt(SENDINFO(m_iGhosterTeam)),
 SendPropInt(SENDINFO(m_iLoadoutWepChoice)),
 SendPropInt(SENDINFO(m_iNextSpawnClassChoice)),
+SendPropInt(SENDINFO(m_bInLean)),
 
 SendPropBool(SENDINFO(m_bGhostExists)),
 SendPropBool(SENDINFO(m_bInThermOpticCamo)),
@@ -82,6 +83,7 @@ DEFINE_FIELD(m_iCapTeam, FIELD_INTEGER),
 DEFINE_FIELD(m_iGhosterTeam, FIELD_INTEGER),
 DEFINE_FIELD(m_iLoadoutWepChoice, FIELD_INTEGER),
 DEFINE_FIELD(m_iNextSpawnClassChoice, FIELD_INTEGER),
+DEFINE_FIELD(m_bInLean, FIELD_INTEGER),
 
 DEFINE_FIELD(m_bGhostExists, FIELD_BOOLEAN),
 DEFINE_FIELD(m_bInThermOpticCamo, FIELD_BOOLEAN),
@@ -360,6 +362,7 @@ CNEO_Player::CNEO_Player()
 	m_bInThermOpticCamo = m_bInVision = false;
 	m_bHasBeenAirborneForTooLongToSuperJump = false;
 	m_bInAim = false;
+	m_bInLean = NEO_LEAN_NONE;
 
 	m_iCapTeam = TEAM_UNASSIGNED;
 	m_iGhosterTeam = TEAM_UNASSIGNED;
@@ -560,6 +563,38 @@ void CNEO_Player::CheckVisionButtons()
 
 					EmitSound(filter, edict()->m_EdictIndex, params);
 				}
+			}
+		}
+	}
+}
+
+void CNEO_Player::CheckLeanButtons()
+{
+	if (IsAlive())
+	{
+		if (neo_lean_toggle.GetBool())
+		{
+			if (m_afButtonPressed & IN_LEAN_LEFT)
+			{
+				if (m_bInLean == NEO_LEAN_LEFT) m_bInLean = NEO_LEAN_NONE;
+				else m_bInLean = NEO_LEAN_LEFT;
+			}
+			if (m_afButtonPressed & IN_LEAN_RIGHT)
+			{
+				if (m_bInLean == NEO_LEAN_RIGHT) m_bInLean = NEO_LEAN_NONE;
+				else m_bInLean = NEO_LEAN_RIGHT;
+			}
+		}
+		else
+		{
+			m_bInLean = NEO_LEAN_NONE;
+			if ((m_nButtons & IN_LEAN_LEFT) && !(m_nButtons & IN_LEAN_RIGHT))
+			{
+				m_bInLean = NEO_LEAN_LEFT;
+			}
+			else if ((m_nButtons & IN_LEAN_RIGHT) && !(m_nButtons & IN_LEAN_LEFT))
+			{
+				m_bInLean = NEO_LEAN_RIGHT;
 			}
 		}
 	}
@@ -954,6 +989,8 @@ void CNEO_Player::PostThink(void)
 	{
 		m_bFirstDeathTick = true;
 	}
+
+	CheckLeanButtons();
 
 	auto pWep = GetActiveWeapon();
 	CNEOBaseCombatWeapon* pNeoWep = NULL;

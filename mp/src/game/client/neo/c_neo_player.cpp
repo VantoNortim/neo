@@ -66,6 +66,7 @@ IMPLEMENT_CLIENTCLASS_DT(C_NEO_Player, DT_NEO_Player, CNEO_Player)
 	RecvPropInt(RECVINFO(m_iCapTeam)),
 	RecvPropInt(RECVINFO(m_iLoadoutWepChoice)),
 	RecvPropInt(RECVINFO(m_iNextSpawnClassChoice)),
+	RecvPropInt(RECVINFO(m_bInLean)),
 
 	RecvPropVector(RECVINFO(m_vecGhostMarkerPos)),
 	RecvPropInt(RECVINFO(m_iGhosterTeam)),
@@ -93,6 +94,7 @@ BEGIN_PREDICTION_DATA(C_NEO_Player)
 	DEFINE_PRED_FIELD(m_bInThermOpticCamo, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE),
 	DEFINE_PRED_FIELD(m_bLastTickInThermOpticCamo, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE),
 	DEFINE_PRED_FIELD(m_bInAim, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE),
+	DEFINE_PRED_FIELD(m_bInLean, FIELD_INTEGER, FTYPEDESC_INSENDTABLE),
 	DEFINE_PRED_FIELD(m_bInVision, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE),
 	DEFINE_PRED_FIELD(m_bHasBeenAirborneForTooLongToSuperJump, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE),
 
@@ -380,6 +382,38 @@ void C_NEO_Player::CheckVisionButtons()
 				params.m_hSoundScriptHandle = visionToggle;
 
 				EmitSound(filter, entindex(), params);
+			}
+		}
+	}
+}
+
+void C_NEO_Player::CheckLeanButtons()
+{
+	if (IsAlive())
+	{
+		if (neo_lean_toggle.GetBool())
+		{
+			if (m_afButtonPressed & IN_LEAN_LEFT)
+			{
+				if (m_bInLean == NEO_LEAN_LEFT) m_bInLean = NEO_LEAN_NONE;
+				else m_bInLean = NEO_LEAN_LEFT;
+			}
+			if (m_afButtonPressed & IN_LEAN_RIGHT)
+			{
+				if (m_bInLean == NEO_LEAN_RIGHT) m_bInLean = NEO_LEAN_NONE;
+				else m_bInLean = NEO_LEAN_RIGHT;
+			}
+		}
+		else
+		{
+			m_bInLean = NEO_LEAN_NONE;
+			if ((m_nButtons & IN_LEAN_LEFT) && !(m_nButtons & IN_LEAN_RIGHT))
+			{
+				m_bInLean = NEO_LEAN_LEFT;
+			}
+			else if ((m_nButtons & IN_LEAN_RIGHT) && !(m_nButtons & IN_LEAN_LEFT))
+			{
+				m_bInLean = NEO_LEAN_RIGHT;
 			}
 		}
 	}
@@ -851,6 +885,8 @@ void C_NEO_Player::PostThink(void)
 			m_bFirstDeathTick = true;
 		}
 	}
+
+	CheckLeanButtons();
 
 	C_BaseCombatWeapon *pWep = GetActiveWeapon();
 
