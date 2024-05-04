@@ -595,7 +595,8 @@ void CNEO_Player::PreThink(void)
 	{
 		if (m_flCamoAuxLastTime == 0)
 		{
-			if (SuitPower_GetCurrentPercentage() >= CLOAK_AUX_COST)
+			// if (SuitPower_GetCurrentPercentage() >= CLOAK_AUX_COST)
+			if (CloakPower_GetCurrentPercentage() >= CLOAK_AUX_COST)
 			{
 				m_flCamoAuxLastTime = gpGlobals->curtime;
 			}
@@ -608,13 +609,16 @@ void CNEO_Player::PreThink(void)
 				// Need to have at least this much spare AUX to enable.
 				// This prevents AUX spam abuse where player has a sliver of AUX
 				// each frame to never really run out.
-				SuitPower_Drain(deltaTime * CLOAK_AUX_COST);
+				//SuitPower_Drain(deltaTime * CLOAK_AUX_COST);
+				CloakPower_Drain(deltaTime * CLOAK_AUX_COST);
 
-				if (SuitPower_GetCurrentPercentage() < CLOAK_AUX_COST)
+				// if (SuitPower_GetCurrentPercentage() < CLOAK_AUX_COST)
+				if (CloakPower_GetCurrentPercentage() < CLOAK_AUX_COST)
 				{
 					m_bInThermOpticCamo = false;
 
-					SuitPower_SetCharge(0);
+					//SuitPower_SetCharge(0);
+					CloakPower_SetCharge(0);
 					m_flCamoAuxLastTime = 0;
 				}
 				else
@@ -824,7 +828,8 @@ void CNEO_Player::CheckThermOpticButtons()
 			return;
 		}
 
-		if (SuitPower_GetCurrentPercentage() >= CLOAK_AUX_COST)
+		// if (SuitPower_GetCurrentPercentage() >= CLOAK_AUX_COST)
+		if (CloakPower_GetCurrentPercentage() >= CLOAK_AUX_COST)
 		{
 			m_bInThermOpticCamo = !m_bInThermOpticCamo;
 
