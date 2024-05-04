@@ -152,10 +152,6 @@ public:
 	bool CloakPower_Drain(float flPower); // consume some of the suit's power.
 	void CloakPower_Charge(float flPower); // add suit power.
 	void CloakPower_SetCharge(float flPower) { m_HL2Local.m_cloakPower = flPower; }
-	void CloakPower_Initialize(void);
-	bool CloakPower_IsDeviceActive(const CSuitPowerDevice& device);
-	bool CloakPower_AddDevice(const CSuitPowerDevice& device);
-	bool CloakPower_RemoveDevice(const CSuitPowerDevice& device);
 	bool CloakPower_ShouldRecharge(void);
 	float CloakPower_GetCurrentPercentage(void) { return m_HL2Local.m_cloakPower; }
 
