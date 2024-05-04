@@ -80,11 +80,12 @@ public:
 		SetBounds(0, 0, m_iPosX, m_iPosY);
 
 		// NEO HACK (Rain): this is kind of awkward, we should get the handle on ApplySchemeSettings
+#ifdef CLIENT_DLL
 		vgui::IScheme *scheme = vgui::scheme()->GetIScheme(neoscheme);
 		Assert(scheme);
 
 		m_hFont = scheme->GetFont("NHudOCRSmall", true);
-
+#endif
 		m_hCapTex = vgui::surface()->CreateNewTextureID();
 		Assert(m_hCapTex > 0);
 		vgui::surface()->DrawSetTextureFile(m_hCapTex, "vgui/hud/ctg/g_beacon_arrow_down", 1, false);
