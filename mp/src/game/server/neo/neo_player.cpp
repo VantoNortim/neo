@@ -472,6 +472,8 @@ void CNEO_Player::Spawn(void)
 	SetNumAnimOverlays(NUM_LAYERS_WANTED);
 	ResetAnimation();
 
+	CloakPower_SetCharge(100);
+
 	m_bIsPendingSpawnForThisRound = false;
 
 	m_bLastTickInThermOpticCamo = m_bInThermOpticCamo = false;
@@ -565,6 +567,11 @@ void CNEO_Player::CheckVisionButtons()
 void CNEO_Player::PreThink(void)
 {
 	BaseClass::PreThink();
+
+	if (!m_bInThermOpticCamo)
+	{
+		CloakPower_Update();
+	}
 
 	if ((!GetActiveWeapon() && IsAlive()) ||
 		// Whether or not we move backwards affects max speed
@@ -2306,6 +2313,8 @@ bool CNEO_Player::CloakPower_RemoveDevice(const CSuitPowerDevice& device)
 #define CLOAKPOWER_BEGIN_RECHARGE_DELAY	0.5f
 bool CNEO_Player::CloakPower_ShouldRecharge(void)
 {
+	
+
 	// Make sure all devices are off.
 	if (m_HL2Local.m_bitsActiveDevices != 0x00000000)
 	{
