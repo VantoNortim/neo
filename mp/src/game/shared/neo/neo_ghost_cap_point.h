@@ -80,9 +80,6 @@ public:
 		SetBounds(0, 0, m_iPosX, m_iPosY);
 
 		// NEO HACK (Rain): this is kind of awkward, we should get the handle on ApplySchemeSettings
-		vgui::HScheme neoscheme = vgui::scheme()->LoadSchemeFromFileEx(
-			enginevgui->GetPanel(PANEL_CLIENTDLL), "resource/ClientScheme_Neo.res", "ClientScheme_Neo");
-		SetScheme(neoscheme);
 		vgui::IScheme *scheme = vgui::scheme()->GetIScheme(neoscheme);
 		Assert(scheme);
 
