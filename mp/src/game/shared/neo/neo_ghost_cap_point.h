@@ -54,11 +54,18 @@ public:
 		m_flCapTexScale = 1.0f;
 		m_flMyRadius = 0;
 
+		memset(m_szMarkerText, 0, sizeof(m_szMarkerText));
+		memset(m_wszMarkerTextUnicode, 0, sizeof(m_wszMarkerTextUnicode));
+
 		m_vecMyPos = vec3_origin;
 
 		SetAutoDelete(true);
 
-		SetScheme("ClientScheme.res");
+#ifdef CLIENT_DLL
+		vgui::HScheme neoscheme = vgui::scheme()->LoadSchemeFromFileEx(
+			enginevgui->GetPanel(PANEL_CLIENTDLL), "resource/ClientScheme_Neo.res", "ClientScheme_Neo");
+		SetScheme(neoscheme);
+#endif
 
 		if (parent)
 		{
@@ -91,6 +98,9 @@ public:
 
 	virtual void Paint()
 	{
+		SetFgColor(COLOR_TRANSPARENT);
+		SetBgColor(COLOR_TRANSPARENT);
+
 		BaseClass::Paint();
 
 		const Color jinColor = Color(38, 127, 0, 255),
@@ -129,6 +139,28 @@ public:
 
 		const int offset_X = x - ((m_iCapTexWidth / 2) * scale);
 		const int offset_Y = y - ((m_iCapTexHeight / 2) * scale);
+
+#ifdef CLIENT_DLL
+		if (playerIsPlaying)
+		{
+			const float distance = METERS_PER_INCH * player->GetAbsOrigin().DistTo(m_vecMyPos);
+			if (distance > 0.2)
+			{
+				// TODO (nullsystem): None of this is particularly efficient, but it works so
+				V_snprintf(m_szMarkerText, sizeof(m_szMarkerText), "RETRIEVAL ZONE DISTANCE: %.0f m", distance);
+				g_pVGuiLocalize->ConvertANSIToUnicode(m_szMarkerText, m_wszMarkerTextUnicode, sizeof(m_wszMarkerTextUnicode));
+
+				int xWide = 0;
+				int yTall = 0;
+				vgui::surface()->GetTextSize(m_hFont, m_wszMarkerTextUnicode, xWide, yTall);
+				vgui::surface()->DrawSetColor(COLOR_TRANSPARENT);
+				vgui::surface()->DrawSetTextColor(COLOR_TINTGREY);
+				vgui::surface()->DrawSetTextFont(m_hFont);
+				vgui::surface()->DrawSetTextPos(x - (xWide / 2), offset_Y + (m_iCapTexHeight * scale) + (yTall / 2));
+				vgui::surface()->DrawPrintText(m_wszMarkerTextUnicode, sizeof(m_szMarkerText));
+			}
+		}
+#endif
 
 		vgui::surface()->DrawSetColor(*targetColor);
 		vgui::surface()->DrawSetTexture(m_hCapTex);
