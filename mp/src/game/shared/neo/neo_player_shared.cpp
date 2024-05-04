@@ -24,6 +24,7 @@ ConVar cl_autoreload_when_empty("cl_autoreload_when_empty", "1", FCVAR_USERINFO,
 	"Automatically start reloading when the active weapon becomes empty.",
 	true, 0.0f, true, 1.0f);
 
+ConVar cl_aimhold("cl_aimhold", "0", FCVAR_USERINFO, "Hold to aim as opposed to toggle aim.", true, 0.0f, true, 1.0f);
 ConVar neo_lean_toggle("neo_lean_toggle", "0", FCVAR_USERINFO, "Set leaning to toggle-mode.", true, 0.0f, true, 1.0f);
 
 ConVar neo_recon_superjump_intensity("neo_recon_superjump_intensity", "250", FCVAR_REPLICATED | FCVAR_CHEAT,
