@@ -18,13 +18,11 @@
 
 #include "ammodef.h"
 
-// memdbgon must be the last include file in a .cpp file!!!
-#include <algorithm>
-
 #include "weapon_grenade.h"
 #include "weapon_neobasecombatweapon.h"
 #include "weapon_smokegrenade.h"
 #include "weapon_supa7.h"
+// memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 NEO_HUD_ELEMENT_DECLARE_FREQ_CVAR(Ammo, 0.00695);
@@ -126,7 +124,7 @@ void CNEOHud_Ammo::DrawAmmo() const
 	}
 
 	const Color textColor = COLOR_WHITE;
-	auto textColorTransparent = *new Color(textColor.r(), textColor.g(), textColor.b(), 127);
+	auto textColorTransparent = Color(textColor.r(), textColor.g(), textColor.b(), 127);
 
 	const size_t maxWepnameLen = 64;
 	char wepName[maxWepnameLen]{ '\0' };
