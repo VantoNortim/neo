@@ -93,6 +93,24 @@ bool PlayerAnimToPlayerAnimEvent(const PLAYER_ANIM playerAnim, PlayerAnimEvent_t
 	return success;
 }
 
+bool ClientWantsLeanToggle(const CNEO_Player* player)
+{
+#ifdef CLIENT_DLL
+	return neo_lean_toggle.GetBool();
+#else
+	if (!player)
+	{
+		return false;
+	}
+	else if (player->GetFlags() & FL_FAKECLIENT)
+	{
+		return true;
+	}
+
+	return 1 == atoi(engine->GetClientConVarValue(engine->IndexOfEdict(player->edict()), "neo_lean_toggle"));
+#endif
+}
+
 bool ClientWantsAimHold(const CNEO_Player* player)
 {
 #ifdef CLIENT_DLL

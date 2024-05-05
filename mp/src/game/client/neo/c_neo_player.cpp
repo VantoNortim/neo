@@ -304,6 +304,7 @@ C_NEO_Player::C_NEO_Player()
 	m_bInThermOpticCamo = m_bInVision = false;
 	m_bHasBeenAirborneForTooLongToSuperJump = false;
 	m_bInAim = false;
+	m_bInLean = NEO_LEAN_NONE;
 
 	m_pNeoPanel = NULL;
 
@@ -382,38 +383,6 @@ void C_NEO_Player::CheckVisionButtons()
 				params.m_hSoundScriptHandle = visionToggle;
 
 				EmitSound(filter, entindex(), params);
-			}
-		}
-	}
-}
-
-void C_NEO_Player::CheckLeanButtons()
-{
-	if (IsAlive())
-	{
-		if (neo_lean_toggle.GetBool())
-		{
-			if (m_afButtonPressed & IN_LEAN_LEFT)
-			{
-				if (m_bInLean == NEO_LEAN_LEFT) m_bInLean = NEO_LEAN_NONE;
-				else m_bInLean = NEO_LEAN_LEFT;
-			}
-			if (m_afButtonPressed & IN_LEAN_RIGHT)
-			{
-				if (m_bInLean == NEO_LEAN_RIGHT) m_bInLean = NEO_LEAN_NONE;
-				else m_bInLean = NEO_LEAN_RIGHT;
-			}
-		}
-		else
-		{
-			m_bInLean = NEO_LEAN_NONE;
-			if ((m_nButtons & IN_LEAN_LEFT) && !(m_nButtons & IN_LEAN_RIGHT))
-			{
-				m_bInLean = NEO_LEAN_LEFT;
-			}
-			else if ((m_nButtons & IN_LEAN_RIGHT) && !(m_nButtons & IN_LEAN_LEFT))
-			{
-				m_bInLean = NEO_LEAN_RIGHT;
 			}
 		}
 	}
@@ -885,8 +854,6 @@ void C_NEO_Player::PostThink(void)
 		}
 	}
 
-	CheckLeanButtons();
-
 	C_BaseCombatWeapon *pWep = GetActiveWeapon();
 
 	if (pWep)
@@ -1001,6 +968,7 @@ void C_NEO_Player::Spawn( void )
 
 	m_bInVision = false;
 	m_nVisionLastTick = 0;
+	m_bInLean = NEO_LEAN_NONE;
 
 	Weapon_SetZoom(false);
 
