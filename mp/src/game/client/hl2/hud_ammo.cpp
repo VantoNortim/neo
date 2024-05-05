@@ -508,5 +508,6 @@ private:
 	int		m_iAmmo;
 };
 
+#ifndef NEO // CNEOHud_Ammo
 DECLARE_HUDELEMENT( CHudSecondaryAmmo );
-
+#endif

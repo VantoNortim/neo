@@ -531,14 +531,7 @@ void CWeaponSupa7::AddViewKick(void)
 	pPlayer->ViewPunch(punch);
 }
 
-bool C_WeaponSupa7::SlugLoaded() const
+bool CWeaponSupa7::SlugLoaded() const
 {
 	return m_bSlugLoaded;
 }
-
-
-bool C_WeaponSupa7::SlugLoaded() const
-{
-	return m_bSlugLoaded;
-}
-
