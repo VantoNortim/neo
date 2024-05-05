@@ -259,7 +259,7 @@ enum NeoWeponAimToggleE {
 	NEO_TOGGLE_FORCE_UN_AIM,
 };
 
-extern ConVar cl_aimhold;
+bool ClientWantsAimHold(const CNEO_Player* player);
 
 enum NeoLeanDirectionE {
 	NEO_LEAN_NONE = 0,
