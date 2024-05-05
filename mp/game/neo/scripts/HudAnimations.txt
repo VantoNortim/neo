@@ -163,15 +163,15 @@ event HudTakeDamageFront
 
 event HudTakeDamageLeft
 {
-	Animate HudDamageIndicator DmgColorLeft		"255 88 0 200"	Linear 0.0 0.0
-	Animate HudDamageIndicator DmgColorLeft		"255 0 0 200"	Linear 0.0 0.3
+	Animate HudDamageIndicator DmgColorLeft		"255 88 0 100"	Linear 0.0 0.0
+	Animate HudDamageIndicator DmgColorLeft		"255 0 0 100"	Linear 0.0 0.3
 	Animate HudDamageIndicator DmgColorLeft		"255 0 0 0"	Deaccel 0.3 0.5
 }
 
 event HudTakeDamageRight
 {
-	Animate HudDamageIndicator DmgColorRight		"255 88 0 200"	Linear 0.0 0.0
-	Animate HudDamageIndicator DmgColorRight		"255 0 0 200"	Linear 0.0 0.3
+	Animate HudDamageIndicator DmgColorRight		"255 88 0 100"	Linear 0.0 0.0
+	Animate HudDamageIndicator DmgColorRight		"255 0 0 100"	Linear 0.0 0.3
 	Animate HudDamageIndicator DmgColorRight		"255 0 0 0"	Deaccel 0.3 0.5
 }
 
@@ -183,22 +183,22 @@ event HudTakeDamageBehind
 
 event HudTakeDamageHighLeft
 {
-	Animate HudDamageIndicator DmgHighColorLeft	"255 88 0 255"	Linear 0.0 0.0
-	Animate HudDamageIndicator DmgHighColorLeft	"255 0 0 200"	Linear 0.0 0.4
+	Animate HudDamageIndicator DmgHighColorLeft	"255 88 0 127"	Linear 0.0 0.0
+	Animate HudDamageIndicator DmgHighColorLeft	"255 0 0 100"	Linear 0.0 0.4
 	Animate HudDamageIndicator DmgHighColorLeft	"255 0 0 0"	Deaccel 0.4 2.4
 }
 
 event HudTakeDamageHighRight
 {
-	Animate HudDamageIndicator DmgHighColorRight	"255 88 0 255"	Linear 0.0 0.0
-	Animate HudDamageIndicator DmgHighColorRight	"255 0 0 200"	Linear 0.0 0.4
+	Animate HudDamageIndicator DmgHighColorRight	"255 88 0 127"	Linear 0.0 0.0
+	Animate HudDamageIndicator DmgHighColorRight	"255 0 0 100"	Linear 0.0 0.4
 	Animate HudDamageIndicator DmgHighColorRight	"255 0 0 0"	Deaccel	0.4 2.4
 }
 
 event HudTakeDamageHigh
 {
-	Animate HudDamageIndicator DmgFullscreenColor	"255 88 0 200"	Linear 0.0 0.0
-	Animate HudDamageIndicator DmgFullscreenColor	"255 0 0 200"	Linear 0.0 0.4
+	Animate HudDamageIndicator DmgFullscreenColor	"255 88 0 100"	Linear 0.0 0.0
+	Animate HudDamageIndicator DmgFullscreenColor	"255 0 0 100"	Linear 0.0 0.4
 	Animate HudDamageIndicator DmgFullscreenColor	"255 0 0 0"	Deaccel 0.4 2.4
 }
 
