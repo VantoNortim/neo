@@ -1817,7 +1817,7 @@ void CBaseCombatWeapon::ItemPostFrame( void )
 	// -----------------------
 	//  No buttons down
 	// -----------------------
-	if (!((pOwner->m_nButtons & IN_ATTACK) || (pOwner->m_nButtons & IN_ATTACK2) || (CanReload() && pOwner->m_nButtons & IN_RELOAD)))
+	if (!(((pOwner->m_nButtons & IN_ATTACK) && !(pOwner->m_nButtons & IN_SPEED)) || (pOwner->m_nButtons & IN_ATTACK2) || (CanReload() && pOwner->m_nButtons & IN_RELOAD)))
 	{
 		// no fire buttons down or reloading
 		if ( !ReloadOrSwitchWeapons() && ( m_bInReload == false ) )

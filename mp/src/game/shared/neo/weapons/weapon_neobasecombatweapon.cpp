@@ -265,6 +265,42 @@ void CNEOBaseCombatWeapon::ItemPreFrame(void)
 	}
 }
 
+// Handles lowering the weapon view model when character is sprinting
+void CNEOBaseCombatWeapon::ProcessAnimationEvents(void)
+{
+	CBasePlayer* pOwner = ToBasePlayer(GetOwner());
+	if (!pOwner)
+		return;
+
+	if (!m_bLowered && (pOwner->m_nButtons & IN_SPEED) && !m_bInReload)
+	{
+		m_bLowered = true;
+		m_flNextPrimaryAttack = gpGlobals->curtime + GetViewModelSequenceDuration();
+		m_flNextSecondaryAttack = m_flNextPrimaryAttack;
+	}
+	else if (m_bLowered && !(pOwner->m_nButtons & IN_SPEED))
+	{
+		m_bLowered = false;
+		m_flNextPrimaryAttack = gpGlobals->curtime + GetViewModelSequenceDuration();
+		m_flNextSecondaryAttack = m_flNextPrimaryAttack;
+	}
+
+	if (m_bLowered)
+	{
+		if (gpGlobals->curtime > m_flNextPrimaryAttack)
+		{
+			m_flNextPrimaryAttack = gpGlobals->curtime + GetViewModelSequenceDuration();
+			m_flNextSecondaryAttack = m_flNextPrimaryAttack;
+		}
+	}
+}
+
+void CNEOBaseCombatWeapon::ItemPostFrame(void)
+{
+	ProcessAnimationEvents();
+	BaseClass::ItemPostFrame();
+}
+
 ConVar sv_neo_wep_acc_penalty_scale("sv_neo_wep_acc_penalty_scale", "7.5", FCVAR_REPLICATED,
 	"Temporary global neo wep accuracy penalty scaler.", true, 0.01, true, 9999.0);
 
@@ -362,7 +398,7 @@ void CNEOBaseCombatWeapon::PrimaryAttack(void)
 {
 	Assert(!ShootingIsPrevented());
 
-	if (gpGlobals->curtime < m_flSoonestAttack)
+	if (gpGlobals->curtime < m_flSoonestAttack || m_bLowered)
 	{
 		return;
 	}
