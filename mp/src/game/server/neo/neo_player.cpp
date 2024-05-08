@@ -1540,6 +1540,7 @@ bool CNEO_Player::Weapon_Switch( CBaseCombatWeapon *pWeapon,
                                  int viewmodelindex )
 {
 	ShowCrosshair(false);
+	Weapon_SetZoom(false);
 
 	return BaseClass::Weapon_Switch(pWeapon, viewmodelindex);
 }
