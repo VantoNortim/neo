@@ -169,7 +169,7 @@ public:
 		{
 			return true;
 		}
-		if (owner->m_nButtons & IN_SPEED)
+		if (owner->IsSprinting())
 		{
 			return true;
 		}
