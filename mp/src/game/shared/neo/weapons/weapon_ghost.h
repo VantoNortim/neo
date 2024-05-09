@@ -46,6 +46,8 @@ public:
 	virtual int GetNeoWepXPCost(const int neoClass) const { return 0; }
 
 	virtual float GetSpeedScale(void) const { return 1.0; }
+	float GetGhostRangeInHammerUnits() const;
+	bool IsPosWithinViewDistance(const Vector &otherPlayerPos) const;
 
 private:
 	void ZeroGhostedPlayerLocArray(void);
@@ -67,6 +69,7 @@ private:
 #endif
 
 private:
+	static float DistanceToPlayer(const Vector& ghosterPos, const Vector& otherPlayerPos);
 
 #ifdef CLIENT_DLL
 	bool m_bHavePlayedGhostEquipSound;

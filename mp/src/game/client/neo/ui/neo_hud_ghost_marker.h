@@ -8,9 +8,11 @@
 #include "hudelement.h"
 #include <vgui_controls/Panel.h>
 
-class CNEOHud_GhostMarker : public CNEOHud_ChildElement, public CHudElement, public vgui::Panel
+#include "neo_hud_worldpos_marker.h"
+
+class CNEOHud_GhostMarker : public CNEOHud_WorldPosMarker
 {
-	DECLARE_CLASS_SIMPLE(CNEOHud_GhostMarker, Panel);
+	DECLARE_CLASS_SIMPLE(CNEOHud_GhostMarker, CNEOHud_WorldPosMarker)
 
 public:
 	CNEOHud_GhostMarker(const char *pElemName, vgui::Panel *parent = NULL);

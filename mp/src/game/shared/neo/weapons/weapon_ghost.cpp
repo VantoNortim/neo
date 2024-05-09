@@ -23,6 +23,8 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
+ConVar cl_neo_ghost_view_distance("cl_neo_ghost_view_distance", "45", FCVAR_REPLICATED, "How far can the ghost user see players in meters.");
+
 IMPLEMENT_NETWORKCLASS_ALIASED(WeaponGhost, DT_WeaponGhost)
 
 BEGIN_NETWORK_TABLE(CWeaponGhost, DT_WeaponGhost)
@@ -96,6 +98,16 @@ CWeaponGhost::~CWeaponGhost(void)
 			player->m_bGhostExists = false;
 		}
 	}
+}
+
+bool CWeaponGhost::IsPosWithinViewDistance(const Vector& otherPlayerPos) const
+{
+	auto owner = GetOwner();
+	if(!owner)
+		return false;
+	
+	auto dist = DistanceToPlayer(owner->EyePosition(), otherPlayerPos);
+	return dist <= GetGhostRangeInHammerUnits();
 }
 
 void CWeaponGhost::ZeroGhostedPlayerLocArray(void)
@@ -235,9 +247,6 @@ void CWeaponGhost::HideEnemies(void)
 	}
 }
 
-// Purpose: Iterate through all enemies and give ghoster their position info,
-// either via client's own PVS information or networked by the server when needed.
-// Returns distance to closest enemy, or -1 if no enemies.
 float CWeaponGhost::ShowEnemies(void)
 {
 	C_NEO_Player *player = (C_NEO_Player*)GetOwner();
@@ -280,54 +289,25 @@ float CWeaponGhost::ShowEnemies(void)
 
 		const bool isInPVS = otherPlayer->IsVisible();
 
-		// If it's in my PVS already
-		if (isInPVS)
+		ShowBeacon(i, otherPlayer->GetAbsOrigin());
+
+		if (neo_ghost_debug_spew.GetBool())
 		{
-			ShowBeacon(i, otherPlayer->GetAbsOrigin());
-
-			if (neo_ghost_debug_spew.GetBool())
-			{
-				DevMsg("Ghosting enemy from my PVS: %f %f %f\n",
-					otherPlayer->GetAbsOrigin().x,
-					otherPlayer->GetAbsOrigin().y,
-					otherPlayer->GetAbsOrigin().z);
-			}
-			
-			if (neo_ghost_debug_hudinfo.GetBool())
-			{
-				Debug_ShowPos(otherPlayer->GetAbsOrigin(), isInPVS);
-			}
-
-			const float distance = (player->GetAbsOrigin().DistTo(otherPlayer->GetAbsOrigin()) / METERS_PER_INCH / 1000.0f);
-			if (distance < closestDistance)
-			{
-				closestDistance = distance;
-			}
+			DevMsg("Ghosting enemy from my PVS: %f %f %f\n",
+				otherPlayer->GetAbsOrigin().x,
+				otherPlayer->GetAbsOrigin().y,
+				otherPlayer->GetAbsOrigin().z);
 		}
-		// Else, the server will provide us with this enemy's position info
-		else
-		{
-			ShowBeacon(i, m_rvPlayerPositions[i]);
-
-			if (neo_ghost_debug_spew.GetBool())
-			{
-				DevMsg("Ghosting enemy from server pos: %f %f %f\n",
-					m_rvPlayerPositions[i].x,
-					m_rvPlayerPositions[i].y,
-					m_rvPlayerPositions[i].z);
-			}
 			
-			if (neo_ghost_debug_hudinfo.GetBool())
-			{
-				Debug_ShowPos(m_rvPlayerPositions[i], isInPVS);
-			}
+		if (neo_ghost_debug_hudinfo.GetBool())
+		{
+			Debug_ShowPos(otherPlayer->GetAbsOrigin(), isInPVS);
+		}
 
-			const float distance = (player->GetAbsOrigin().DistTo(m_rvPlayerPositions[i]) / METERS_PER_INCH / 1000.0f);
-
-			if (distance < closestDistance)
-			{
-				closestDistance = distance;
-			}
+		const float distance = (player->GetAbsOrigin().DistTo(otherPlayer->GetAbsOrigin()) / METERS_PER_INCH / 1000.0f);
+		if (distance < closestDistance)
+		{
+			closestDistance = distance;
 		}
 	}
 
@@ -351,25 +331,8 @@ void CWeaponGhost::ShowBeacon(int clientIndex, const Vector &pos)
 		return;
 	}
 
-	Vector dir = GetOwner()->EyePosition() - pos;
-
-	// NEO TODO (Rain): make server cvar in shared code
-	const float maxGhostRangeMeters = 45.0f;
-
-	const float distance = dir.Length2D();
-	const float distMeters = (distance / METERS_PER_INCH) / 1000.0f;
-
-	// Server will never give us info beyond the ghost range,
-	// so this only happens if there was a target in PVS beyond range.
-	// (NEO FIXME (Rain): actually it does, there is no check in place yet)
-	if (distMeters > maxGhostRangeMeters)
-	{
-		return;
-	}
-
-	const float maxDistInHammerUnits = (maxGhostRangeMeters / METERS_PER_INCH);
-
-	Assert(maxDistInHammerUnits > 0);
+	auto maxDistInHammerUnits = GetGhostRangeInHammerUnits();
+	const auto distance = DistanceToPlayer(GetOwner()->EyePosition(), pos);
 
 	const float scaling = clamp((distance / maxDistInHammerUnits),
 		0.25f * neo_ghost_beacon_scale_baseline.GetFloat(),
@@ -385,7 +348,7 @@ void CWeaponGhost::ShowBeacon(int clientIndex, const Vector &pos)
 	int x, y;
 	GetVectorInScreenSpace(temp, x, y); // this is pixels from top-left
 
-	m_pGhostBeacons[clientIndex]->SetGhostTargetPos(x, y, scaling, distMeters);
+	m_pGhostBeacons[clientIndex]->SetGhostTargetPos(x, y, scaling, (distance / METERS_PER_INCH) / 1000.0f);
 	m_pGhostBeacons[clientIndex]->SetVisible(true);
 }
 
@@ -478,4 +441,16 @@ void CWeaponGhost::OnPickedUp(CBaseCombatCharacter *pNewOwner)
 		EmitSound(filter, neoOwner->entindex(), params);
 #endif
 	}
+}
+
+float CWeaponGhost::DistanceToPlayer(const Vector& ghosterPos, const Vector& otherPlayerPos)
+{
+	const auto dir = ghosterPos - otherPlayerPos;
+	return dir.Length2D();
+}
+
+float CWeaponGhost::GetGhostRangeInHammerUnits() const
+{
+	const float maxGhostRangeMeters = cl_neo_ghost_view_distance.GetFloat();
+	return (maxGhostRangeMeters / METERS_PER_INCH);
 }

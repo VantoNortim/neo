@@ -15,6 +15,7 @@
 #include "ienginevgui.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
+#include "neo_hud_worldpos_marker.h"
 #include "tier0/memdbgon.h"
 
 using vgui::surface;
@@ -25,7 +26,7 @@ ConVar neo_ghost_marker_hud_scale_factor("neo_ghost_marker_hud_scale_factor", "0
 NEO_HUD_ELEMENT_DECLARE_FREQ_CVAR(GhostMarker, 0.01)
 
 CNEOHud_GhostMarker::CNEOHud_GhostMarker(const char* pElemName, vgui::Panel* parent)
-	: CHudElement(pElemName), Panel(parent, pElemName)
+	: CNEOHud_WorldPosMarker(pElemName, parent)
 {
 	m_flDistMeters = 0;
 
@@ -93,17 +94,28 @@ void CNEOHud_GhostMarker::DrawNeoHudElement()
 		return;
 	}
 
-	surface()->DrawSetTextColor(COLOR_GREY);
-	surface()->DrawSetTextFont(m_hFont);
-	surface()->DrawSetTextPos(m_iPosX, m_iPosY);
-	surface()->DrawPrintText(m_wszMarkerTextUnicode, sizeof(m_szMarkerText));
+	auto fadeMultiplier = GetFadeValueTowardsScreenCentre(m_iPosX, m_iPosY);
+
+	if(fadeMultiplier > 0.001)
+	{
+		auto adjustedGrey = Color(COLOR_GREY.r(), COLOR_GREY.b(), COLOR_GREY.g(), COLOR_GREY.a() * fadeMultiplier);
+	
+		surface()->DrawSetTextColor(adjustedGrey);
+		surface()->DrawSetTextFont(m_hFont);
+		int textSizeX, textSizeY;
+		surface()->GetTextSize(m_hFont, m_wszMarkerTextUnicode, textSizeX, textSizeY);
+		surface()->DrawSetTextPos(m_iPosX - (textSizeX / 2), m_iPosY + textSizeY);
+		surface()->DrawPrintText(m_wszMarkerTextUnicode, sizeof(m_szMarkerText));
+	}
 
 	const float scale = neo_ghost_marker_hud_scale_factor.GetFloat();
 
 	const int offset_X = m_iPosX - ((m_iMarkerTexWidth * 0.5f) * scale);
 	const int offset_Y = m_iPosY - ((m_iMarkerTexHeight * 0.5f) * scale);
 
-	surface()->DrawSetColor(m_iGhostingTeam == TEAM_JINRAI ? COLOR_JINRAI : (m_iGhostingTeam == TEAM_NSF ? COLOR_NSF : COLOR_GREY));
+	auto color = m_iGhostingTeam == TEAM_JINRAI ? COLOR_JINRAI : (m_iGhostingTeam == TEAM_NSF ? COLOR_NSF : COLOR_GREY);
+
+	surface()->DrawSetColor(color);
 	surface()->DrawSetTexture(m_hTex);
 	surface()->DrawTexturedRect(
 		offset_X,

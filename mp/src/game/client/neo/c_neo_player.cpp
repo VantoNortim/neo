@@ -746,9 +746,8 @@ void C_NEO_Player::PreThink( void )
 				const float distance = METERS_PER_INCH *
 					GetAbsOrigin().DistTo(m_vecGhostMarkerPos);
 
-				// NEO HACK (Rain): We should test if we're holding a ghost
-				// instead of relying on a distance check.
-				if (m_iGhosterTeam != GetTeamNumber() || distance > 0.2)
+				const auto currentWeaponAsGhost = dynamic_cast<CWeaponGhost*> (GetActiveWeapon());
+				if (m_iGhosterTeam != GetTeamNumber() || currentWeaponAsGhost)
 				{
 					ghostMarker->SetVisible(true);
 
