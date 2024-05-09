@@ -1309,14 +1309,15 @@ void CNEORules::SetWinningTeam(int team, int iWinReason, bool bForceMapReset, bo
 				engine->ClientPrintf(player->edict(), victoryMsg);
 				UTIL_ClientPrintAll((gotMatchWinner ? HUD_PRINTTALK : HUD_PRINTCENTER), victoryMsg);
 
-			const char* volStr = engine->GetClientConVarValue(i, snd_victory_volume.GetName());
-			const float jingleVolume = volStr ? atof(volStr) : 0.33f;
-			soundParams.m_flVolume = jingleVolume;
+				const char* volStr = engine->GetClientConVarValue(i, snd_victory_volume.GetName());
+				const float jingleVolume = volStr ? atof(volStr) : 0.33f;
+				soundParams.m_flVolume = jingleVolume;
 
-			CRecipientFilter soundFilter;
-			soundFilter.AddRecipient(basePlayer);
-			soundFilter.MakeReliable();
-			player->EmitSound(soundFilter, i, soundParams);
+				CRecipientFilter soundFilter;
+				soundFilter.AddRecipient(basePlayer);
+				soundFilter.MakeReliable();
+				player->EmitSound(soundFilter, i, soundParams);
+			}
 		}
 	}
 
