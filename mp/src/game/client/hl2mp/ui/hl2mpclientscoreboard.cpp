@@ -562,6 +562,7 @@ bool CHL2MPClientScoreBoardDialog::GetPlayerScoreInfo(int playerIndex, KeyValues
 	const int neoClassIdx = g_PR->GetClass(playerIndex);
 	kv->SetString("rank", GetRankName(xp));
 	kv->SetInt("xp", xp);
+	kv->SetString("class", GetNeoClassName(neoClassIdx));
 
 	const char* statusText = "";
 	if (neoTeam == TEAM_JINRAI || neoTeam == TEAM_NSF)
@@ -572,7 +573,6 @@ bool CHL2MPClientScoreBoardDialog::GetPlayerScoreInfo(int playerIndex, KeyValues
 #else
 	kv->SetInt("frags", g_PR->GetPlayerScore(playerIndex));
 #endif
-	kv->SetString("class", "");
 
 	if (g_PR->GetPing( playerIndex ) < 1)
 	{
