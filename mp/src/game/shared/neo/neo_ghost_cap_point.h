@@ -167,27 +167,6 @@ public:
 			offset_Y,
 			offset_X + (m_iCapTexWidth * scale),
 			offset_Y + (m_iCapTexHeight * scale));
-
-#ifdef CLIENT_DLL
-		if (playerIsPlaying)
-		{
-			const float distance = METERS_PER_INCH * player->GetAbsOrigin().DistTo(m_vecMyPos);
-			if (distance > 0.2)
-			{
-				// TODO (nullsystem): None of this is particularly efficient, but it works so
-				V_snprintf(m_szMarkerText, sizeof(m_szMarkerText), "RETRIEVAL ZONE DISTANCE: %.0f m", distance);
-				g_pVGuiLocalize->ConvertANSIToUnicode(m_szMarkerText, m_wszMarkerTextUnicode, sizeof(m_wszMarkerTextUnicode));
-
-				int xWide = 0;
-				int yTall = 0;
-				vgui::surface()->GetTextSize(m_hFont, m_wszMarkerTextUnicode, xWide, yTall);
-				vgui::surface()->DrawSetTextColor(COLOR_TINTGREY);
-				vgui::surface()->DrawSetTextFont(m_hFont);
-				vgui::surface()->DrawSetTextPos(x - (xWide / 2), offset_Y + (m_iCapTexHeight * scale) + (yTall / 2));
-				vgui::surface()->DrawPrintText(m_wszMarkerTextUnicode, sizeof(m_szMarkerText));
-			}
-		}
-#endif
 	}
 
 	void SetTeam(int team) { m_iMyTeam = team; }
@@ -249,7 +228,7 @@ public:
 	}
 
 #ifdef GAME_DLL
-	int ShouldTransmit(const CCheckTransmitInfo *pInfo) { return EF_BRIGHTLIGHT; }
+	int UpdateTransmitState() override;
 
 	bool IsGhostCaptured(int &outTeamNumber, int &outCaptorClientIndex);
 #endif
