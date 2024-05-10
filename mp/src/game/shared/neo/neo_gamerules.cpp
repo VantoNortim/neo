@@ -1342,6 +1342,11 @@ void CNEORules::SetWinningTeam(int team, int iWinReason, bool bForceMapReset, bo
 				const char* volStr = engine->GetClientConVarValue(i, snd_victory_volume.GetName());
 				const float jingleVolume = volStr ? atof(volStr) : 0.33f;
 				soundParams.m_flVolume = jingleVolume;
+
+				CRecipientFilter soundFilter;
+				soundFilter.AddRecipient(basePlayer);
+				soundFilter.MakeReliable();
+				player->EmitSound(soundFilter, i, soundParams);
 			}
 
 			// Ghost-caps are handled separately
@@ -1356,10 +1361,6 @@ void CNEORules::SetWinningTeam(int team, int iWinReason, bool bForceMapReset, bo
 				player->m_iXP.GetForModify() += xpAward;
 			}
 
-			CRecipientFilter soundFilter;
-			soundFilter.AddRecipient(basePlayer);
-			soundFilter.MakeReliable();
-			player->EmitSound(soundFilter, i, soundParams);
 		}
 	}
 
