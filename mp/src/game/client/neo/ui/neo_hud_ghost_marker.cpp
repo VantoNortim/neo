@@ -94,20 +94,6 @@ void CNEOHud_GhostMarker::DrawNeoHudElement()
 		return;
 	}
 
-	auto fadeMultiplier = GetFadeValueTowardsScreenCentre(m_iPosX, m_iPosY);
-
-	if(fadeMultiplier > 0.001)
-	{
-		auto adjustedGrey = Color(COLOR_GREY.r(), COLOR_GREY.b(), COLOR_GREY.g(), COLOR_GREY.a() * fadeMultiplier);
-	
-		surface()->DrawSetTextColor(adjustedGrey);
-		surface()->DrawSetTextFont(m_hFont);
-		int textSizeX, textSizeY;
-		surface()->GetTextSize(m_hFont, m_wszMarkerTextUnicode, textSizeX, textSizeY);
-		surface()->DrawSetTextPos(m_iPosX - (textSizeX / 2), m_iPosY + textSizeY);
-		surface()->DrawPrintText(m_wszMarkerTextUnicode, sizeof(m_szMarkerText));
-	}
-
 	const float scale = neo_ghost_marker_hud_scale_factor.GetFloat();
 
 	const int offset_X = m_iPosX - ((m_iMarkerTexWidth * 0.5f) * scale);
@@ -138,13 +124,19 @@ void CNEOHud_GhostMarker::DrawNeoHudElement()
 		offset_X + (m_iMarkerTexWidth * scale),
 		offset_Y + (m_iMarkerTexHeight * scale));
 
-	surface()->DrawSetTextColor(COLOR_GREY);
-	int xWide = 0;
-	int yTall = 0;
-	surface()->GetTextSize(m_hFont, m_wszMarkerTextUnicode, xWide, yTall);
-	surface()->DrawSetTextFont(m_hFont);
-	surface()->DrawSetTextPos(m_iPosX - (xWide / 2), offset_Y + (m_iMarkerTexHeight * scale) + (yTall / 2));
-	surface()->DrawPrintText(m_wszMarkerTextUnicode, sizeof(m_szMarkerText));
+	auto fadeMultiplier = GetFadeValueTowardsScreenCentre(m_iPosX, m_iPosY);
+
+	if(fadeMultiplier > 0.001)
+	{
+		auto adjustedGrey = Color(COLOR_GREY.r(), COLOR_GREY.b(), COLOR_GREY.g(), COLOR_GREY.a() * fadeMultiplier);
+	
+		surface()->DrawSetTextColor(adjustedGrey);
+		surface()->DrawSetTextFont(m_hFont);
+		int textSizeX, textSizeY;
+		surface()->GetTextSize(m_hFont, m_wszMarkerTextUnicode, textSizeX, textSizeY);
+		surface()->DrawSetTextPos(m_iPosX - (textSizeX / 2), m_iPosY + textSizeY);
+		surface()->DrawPrintText(m_wszMarkerTextUnicode, sizeof(m_szMarkerText));
+	}
 }
 
 void CNEOHud_GhostMarker::Paint()
