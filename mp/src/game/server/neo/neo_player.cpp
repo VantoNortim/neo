@@ -49,7 +49,6 @@ SendPropInt(SENDINFO(m_iNeoSkin)),
 SendPropInt(SENDINFO(m_iNeoStar)),
 SendPropInt(SENDINFO(m_iXP)),
 SendPropInt(SENDINFO(m_iCapTeam), 3),
-SendPropInt(SENDINFO(m_iGhosterTeam)),
 SendPropInt(SENDINFO(m_iLoadoutWepChoice)),
 SendPropInt(SENDINFO(m_iNextSpawnClassChoice)),
 SendPropInt(SENDINFO(m_bInLean)),
@@ -82,7 +81,6 @@ DEFINE_FIELD(m_iNeoSkin, FIELD_INTEGER),
 DEFINE_FIELD(m_iNeoStar, FIELD_INTEGER),
 DEFINE_FIELD(m_iXP, FIELD_INTEGER),
 DEFINE_FIELD(m_iCapTeam, FIELD_INTEGER),
-DEFINE_FIELD(m_iGhosterTeam, FIELD_INTEGER),
 DEFINE_FIELD(m_iLoadoutWepChoice, FIELD_INTEGER),
 DEFINE_FIELD(m_bDroppedAnything, FIELD_BOOLEAN),
 DEFINE_FIELD(m_iNextSpawnClassChoice, FIELD_INTEGER),
@@ -373,7 +371,6 @@ CNEO_Player::CNEO_Player()
 	m_bInLean = NEO_LEAN_NONE;
 
 	m_iCapTeam = TEAM_UNASSIGNED;
-	m_iGhosterTeam = TEAM_UNASSIGNED;
 	m_iLoadoutWepChoice = 0;
 	m_iNextSpawnClassChoice = -1;
 
@@ -625,28 +622,30 @@ void CNEO_Player::PreThink(void)
 	{
 		CloakPower_Update();
 	}
-
-	if ((!GetActiveWeapon() && IsAlive()) ||
-		// Whether or not we move backwards affects max speed
-		((m_afButtonPressed | m_afButtonReleased) & IN_BACK))
-	{
-		if (GetFlags() & FL_DUCKING)
-		{
-			SetMaxSpeed(GetCrouchSpeed());
-		}
-		else if (IsWalking())
-		{
-			SetMaxSpeed(GetWalkSpeed());
-		}
-		else if (IsSprinting())
-		{
-			SetMaxSpeed(GetSprintSpeed());
-		}
-		else
-		{
-			SetMaxSpeed(GetNormSpeed());
-		}
+	float speed = GetNormSpeed();
+	if (m_nButtons & IN_DUCK && m_nButtons & IN_WALK)
+	{ // 1.77x slower
+		speed /= 1.777;
 	}
+	else if (m_nButtons & IN_DUCK || m_nButtons & IN_WALK)
+	{ // 1.33x slower
+		speed /= 1.333;
+	}
+	if (IsSprinting())
+	{
+		speed *= m_iNeoClass == NEO_CLASS_RECON ? 1.333 : 1.6;
+	}
+	if (m_bInAim.Get())
+	{
+		speed /= 1.666;
+	}
+	auto pNeoWep = dynamic_cast<CNEOBaseCombatWeapon*>(GetActiveWeapon());
+	if (pNeoWep)
+	{
+		speed *= pNeoWep->GetSpeedScale();
+	}
+
+	SetMaxSpeed(speed);
 
 	CheckThermOpticButtons();
 	CheckVisionButtons();
@@ -776,7 +775,21 @@ void CNEO_Player::PreThink(void)
 
 		if (ghost->GetAbsOrigin().IsValid())
 		{
-			m_vecGhostMarkerPos = ghost->GetAbsOrigin();
+			Vector vecNextGhostMarkerPos = ghost->GetAbsOrigin();
+			const int ghosterTeam = NEORules()->ghosterTeam();
+			if (ghosterTeam == TEAM_JINRAI || ghosterTeam == TEAM_NSF)
+			{
+				// Someone's carrying it, center at their body
+				const int playerIdx = NEORules()->GetGhosterPlayer();
+				if (auto player = static_cast<CNEO_Player*>(UTIL_PlayerByIndex(playerIdx)))
+				{
+					const Vector playerEye = player->EyePosition();
+					const Vector playerBase = player->GetAbsOrigin();
+					const float playerMidZ = (playerEye.z - playerBase.z) / 2.0f;
+					vecNextGhostMarkerPos = Vector(playerBase.x, playerBase.y, playerBase.z + playerMidZ);
+				}
+			}
+			m_vecGhostMarkerPos = vecNextGhostMarkerPos;
 		}
 		else
 		{
@@ -2303,15 +2316,12 @@ void CNEO_Player::StartSprinting(void)
 	if (m_nButtons & IN_FORWARD || m_nButtons & IN_BACK || m_nButtons & IN_MOVELEFT || m_nButtons & IN_MOVERIGHT)
 	{ //  ensure any direction button is pressed before sprinting
 		BaseClass::StartSprinting();
-		SetMaxSpeed(GetSprintSpeed());
 	}
 }
 
 void CNEO_Player::StopSprinting(void)
 {
 	BaseClass::StopSprinting();
-
-	SetMaxSpeed(GetNormSpeed());
 }
 
 void CNEO_Player::InitSprinting(void)
@@ -2332,19 +2342,15 @@ bool CNEO_Player::CanSprint(void)
 void CNEO_Player::EnableSprint(bool bEnable)
 {
 	BaseClass::EnableSprint(bEnable);
-
-	SetMaxSpeed(GetSprintSpeed());
 }
 
 void CNEO_Player::StartWalking(void)
 {
-	SetMaxSpeed(GetWalkSpeed());
 	m_fIsWalking = true;
 }
 
 void CNEO_Player::StopWalking(void)
 {
-	SetMaxSpeed(GetNormSpeed());
 	m_fIsWalking = false;
 }
 

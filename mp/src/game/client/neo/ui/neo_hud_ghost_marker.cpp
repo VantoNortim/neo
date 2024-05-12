@@ -113,6 +113,21 @@ void CNEOHud_GhostMarker::DrawNeoHudElement()
 	const int offset_X = m_iPosX - ((m_iMarkerTexWidth * 0.5f) * scale);
 	const int offset_Y = m_iPosY - ((m_iMarkerTexHeight * 0.5f) * scale);
 
+	Color ghostColor = COLOR_GREY;
+	if (m_iGhostingTeam == TEAM_JINRAI || m_iGhostingTeam == TEAM_NSF)
+	{
+		if ((m_iClientTeam == TEAM_JINRAI || m_iClientTeam == TEAM_NSF) && (m_iClientTeam != m_iGhostingTeam))
+		{
+			// If viewing from playing player, but opposite of ghosting team, show red
+			ghostColor = COLOR_RED;
+		}
+		else
+		{
+			// Otherwise show ghosting team color (if friendly or spec)
+			ghostColor = (m_iGhostingTeam == TEAM_JINRAI) ? COLOR_JINRAI : COLOR_NSF;
+		}
+	}
+	surface()->DrawSetColor(ghostColor);
 	auto color = m_iGhostingTeam == TEAM_JINRAI ? COLOR_JINRAI : (m_iGhostingTeam == TEAM_NSF ? COLOR_NSF : COLOR_GREY);
 
 	surface()->DrawSetColor(color);
@@ -122,10 +137,20 @@ void CNEOHud_GhostMarker::DrawNeoHudElement()
 		offset_Y,
 		offset_X + (m_iMarkerTexWidth * scale),
 		offset_Y + (m_iMarkerTexHeight * scale));
+
+	surface()->DrawSetTextColor(COLOR_GREY);
+	int xWide = 0;
+	int yTall = 0;
+	surface()->GetTextSize(m_hFont, m_wszMarkerTextUnicode, xWide, yTall);
+	surface()->DrawSetTextFont(m_hFont);
+	surface()->DrawSetTextPos(m_iPosX - (xWide / 2), offset_Y + (m_iMarkerTexHeight * scale) + (yTall / 2));
+	surface()->DrawPrintText(m_wszMarkerTextUnicode, sizeof(m_szMarkerText));
 }
 
 void CNEOHud_GhostMarker::Paint()
 {
+	SetFgColor(COLOR_TRANSPARENT);
+	SetBgColor(COLOR_TRANSPARENT);
 	BaseClass::Paint();
 	PaintNeoElement();
 }
@@ -133,6 +158,11 @@ void CNEOHud_GhostMarker::Paint()
 void CNEOHud_GhostMarker::SetGhostingTeam(int team)
 {
 	m_iGhostingTeam = team;
+}
+
+void CNEOHud_GhostMarker::SetClientCurrentTeam(int team)
+{
+	m_iClientTeam = team;
 }
 
 void CNEOHud_GhostMarker::SetScreenPosition(int x, int y)

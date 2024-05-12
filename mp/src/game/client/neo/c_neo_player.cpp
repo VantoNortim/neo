@@ -69,7 +69,6 @@ IMPLEMENT_CLIENTCLASS_DT(C_NEO_Player, DT_NEO_Player, CNEO_Player)
 	RecvPropInt(RECVINFO(m_bInLean)),
 
 	RecvPropVector(RECVINFO(m_vecGhostMarkerPos)),
-	RecvPropInt(RECVINFO(m_iGhosterTeam)),
 	RecvPropBool(RECVINFO(m_bGhostExists)),
 	RecvPropBool(RECVINFO(m_bInThermOpticCamo)),
 	RecvPropBool(RECVINFO(m_bLastTickInThermOpticCamo)),
@@ -249,8 +248,6 @@ public:
 		panel->SetControlEnabled("autobutton", true);
 		panel->SetControlEnabled("CancelButton", true);
 
-		panel->MoveToFront();
-
 		if (panel->IsKeyBoardInputEnabled())
 		{
 			panel->RequestFocus();
@@ -298,7 +295,6 @@ C_NEO_Player::C_NEO_Player()
 	m_iCapTeam = TEAM_UNASSIGNED;
 	m_iLoadoutWepChoice = 0;
 	m_iNextSpawnClassChoice = -1;
-	m_iGhosterTeam = TEAM_UNASSIGNED;
 	m_iXP.GetForModify() = 0;
 
 	m_vecGhostMarkerPos = vec3_origin;
@@ -598,28 +594,31 @@ void C_NEO_Player::PreThink( void )
 {
 	BaseClass::PreThink();
 
-	if ((!GetActiveWeapon() && IsAlive()) ||
-		// Whether or not we move backwards affects max speed
-		((m_afButtonPressed | m_afButtonReleased) & IN_BACK))
+	float speed = GetNormSpeed();
+	if (m_nButtons & IN_DUCK && m_nButtons & IN_WALK)
+	{ // 1.77x slower
+		speed /= 1.777;
+	}
+	else if (m_nButtons & IN_DUCK || m_nButtons & IN_WALK)
+	{ // 1.33x slower
+		speed /= 1.333;
+	}
+	if (IsSprinting())
 	{
-		if (GetFlags() & FL_DUCKING)
-		{
-			SetMaxSpeed(GetCrouchSpeed());
-		}
-		else if (IsWalking())
-		{
-			SetMaxSpeed(GetWalkSpeed());
-		}
-		else if (IsSprinting())
-		{
-			SetMaxSpeed(GetSprintSpeed());
-		}
-		else
-		{
-			SetMaxSpeed(GetNormSpeed());
-		}
+		speed *= m_iNeoClass == NEO_CLASS_RECON ? 1.333 : 1.6;
+	}
+	if (IsInAim())
+	{
+		speed /= 1.666;
+	}
+	auto pNeoWep = dynamic_cast<CNEOBaseCombatWeapon*>(GetActiveWeapon());
+	if (pNeoWep)
+	{
+		speed *= pNeoWep->GetSpeedScale();
 	}
 
+	SetMaxSpeed(speed);
+	
 	CheckThermOpticButtons();
 	CheckVisionButtons();
 
@@ -746,8 +745,7 @@ void C_NEO_Player::PreThink( void )
 				const float distance = METERS_PER_INCH *
 					GetAbsOrigin().DistTo(m_vecGhostMarkerPos);
 
-				const auto currentWeaponAsGhost = dynamic_cast<CWeaponGhost*> (GetActiveWeapon());
-				if (m_iGhosterTeam != GetTeamNumber() || currentWeaponAsGhost)
+				if (!IsCarryingGhost())
 				{
 					ghostMarker->SetVisible(true);
 
@@ -755,9 +753,8 @@ void C_NEO_Player::PreThink( void )
 					GetVectorInScreenSpace(m_vecGhostMarkerPos, ghostMarkerX, ghostMarkerY);
 
 					ghostMarker->SetScreenPosition(ghostMarkerX, ghostMarkerY);
-					ghostMarker->SetGhostingTeam(m_iGhosterTeam);
-
-
+					ghostMarker->SetGhostingTeam(NEORules()->ghosterTeam());
+					ghostMarker->SetClientCurrentTeam(GetTeamNumber());
 					ghostMarker->SetGhostDistance(distance);
 				}
 				else
@@ -1080,14 +1077,12 @@ void C_NEO_Player::StartSprinting(void)
 
 	if (m_nButtons & IN_FORWARD || m_nButtons & IN_BACK || m_nButtons & IN_MOVELEFT || m_nButtons & IN_MOVERIGHT)
 	{ //  ensure any direction button is pressed before sprinting
-		SetMaxSpeed(GetSprintSpeed());
+		m_fIsSprinting = true;
 	}
 }
 
 void C_NEO_Player::StopSprinting(void)
 {
-	SetMaxSpeed(GetNormSpeed());
-
 	m_fIsSprinting = false;
 }
 
@@ -1103,16 +1098,12 @@ bool C_NEO_Player::CanSprint(void)
 
 void C_NEO_Player::StartWalking(void)
 {
-	SetMaxSpeed(GetWalkSpeed());
-
 	m_fIsWalking = true;
 }
 
 void C_NEO_Player::StopWalking(void)
 {
-	SetMaxSpeed(GetNormSpeed());
-
-	m_fIsWalking = true;
+	m_fIsWalking = false;
 }
 
 float C_NEO_Player::GetCrouchSpeed_WithActiveWepEncumberment(void) const
