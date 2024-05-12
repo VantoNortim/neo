@@ -12,47 +12,29 @@
 #include <engine/ivdebugoverlay.h>
 #include <engine/IEngineSound.h>
 #include "filesystem.h"
-#include "ui/neo_hud_ghostbeacon.h"
-#include <c_recipientfilter.h>
-#else
-#include "recipientfilter.h"
 #endif
 
 #include "neo_player_shared.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
-
 ConVar cl_neo_ghost_view_distance("cl_neo_ghost_view_distance", "45", FCVAR_REPLICATED, "How far can the ghost user see players in meters.");
 
 IMPLEMENT_NETWORKCLASS_ALIASED(WeaponGhost, DT_WeaponGhost)
 
 BEGIN_NETWORK_TABLE(CWeaponGhost, DT_WeaponGhost)
-#ifdef CLIENT_DLL
-	RecvPropBool(RECVINFO(m_bShouldShowEnemies)),
-	RecvPropArray(RecvPropVector(RECVINFO(m_rvPlayerPositions[0])), m_rvPlayerPositions),
-#else
-	SendPropBool(SENDINFO(m_bShouldShowEnemies)),
-	SendPropArray(SendPropVector(SENDINFO_ARRAY(m_rvPlayerPositions), -1, SPROP_COORD_MP_LOWPRECISION | SPROP_CHANGES_OFTEN, MIN_COORD_FLOAT, MAX_COORD_FLOAT), m_rvPlayerPositions),
-#endif
+	DEFINE_NEO_BASE_WEP_NETWORK_TABLE
 END_NETWORK_TABLE()
 
 #ifdef CLIENT_DLL
 BEGIN_PREDICTION_DATA(CWeaponGhost)
-	DEFINE_PRED_FIELD_TOL(m_rvPlayerPositions, FIELD_VECTOR, FTYPEDESC_INSENDTABLE, 0.5f),
+	DEFINE_NEO_BASE_WEP_PREDICTION
 END_PREDICTION_DATA()
 #endif
 
 NEO_IMPLEMENT_ACTTABLE(CWeaponGhost)
 
 LINK_ENTITY_TO_CLASS(weapon_ghost, CWeaponGhost);
-
-#ifdef GAME_DLL
-BEGIN_DATADESC(CWeaponGhost)
-	DEFINE_FIELD(m_bShouldShowEnemies, FIELD_BOOLEAN),
-	DEFINE_FIELD(m_rvPlayerPositions, FIELD_VECTOR),
-END_DATADESC()
-#endif
 
 PRECACHE_WEAPON_REGISTER(weapon_ghost);
 
@@ -64,80 +46,7 @@ CWeaponGhost::CWeaponGhost(void)
 
 	m_flLastGhostBeepTime = 0;
 
-	for (int i = 0; i < ARRAYSIZE(m_pGhostBeacons); i++)
-	{
-		m_pGhostBeacons[i] = new CNEOHud_GhostBeacon("ghostBeacon");
-	}
 #endif
-
-	// This is just always on for now.
-	// Not sure if there's a reason to ever disable ghosting,
-	// but might as well have the option.
-	SetShowEnemies(true);
-
-	ZeroGhostedPlayerLocArray();
-}
-
-CWeaponGhost::~CWeaponGhost(void)
-{
-#ifdef CLIENT_DLL
-	for (int i = 0; i < ARRAYSIZE(m_pGhostBeacons); i++)
-	{
-		if (m_pGhostBeacons[i])
-		{
-			delete m_pGhostBeacons[i];
-		}
-	}
-#endif
-
-	for (int i = 1; i <= gpGlobals->maxClients; i++)
-	{
-		auto player = static_cast<CNEO_Player*>(UTIL_PlayerByIndex(i));
-		if (player)
-		{
-			player->m_bGhostExists = false;
-		}
-	}
-}
-
-bool CWeaponGhost::IsPosWithinViewDistance(const Vector& otherPlayerPos) const
-{
-	auto owner = GetOwner();
-	if(!owner)
-		return false;
-	
-	auto dist = DistanceToPlayer(owner->EyePosition(), otherPlayerPos);
-	return dist <= GetGhostRangeInHammerUnits();
-}
-
-void CWeaponGhost::ZeroGhostedPlayerLocArray(void)
-{
-	for (int i = 0; i < m_rvPlayerPositions.Count(); i++)
-	{
-		m_rvPlayerPositions.Set(i, Vector(0, 0, 0));
-	}
-	NetworkStateChanged();
-}
-
-void CWeaponGhost::ItemPreFrame(void)
-{
-	// NEO TODO (Rain): it's probably acceptable to move this scope to Tick for perf
-	{
-		// Only show enemies if we are ghosting
-		if (m_bShouldShowEnemies)
-		{
-#ifdef CLIENT_DLL
-			HandleGhostEquip();
-
-			const float closestEnemy = ShowEnemies();
-
-			TryGhostPing(closestEnemy);
-#else
-			// We only need to update this while someone is ghosting
-			UpdateNetworkedEnemyLocations();
-#endif
-		}
-	}
 }
 
 #ifdef CLIENT_DLL
@@ -174,7 +83,6 @@ void CWeaponGhost::HandleGhostUnequip(void)
 {
 	if (!m_bHaveHolsteredTheGhost)
 	{
-		HideEnemies();
 		StopGhostSound();
 		m_bHaveHolsteredTheGhost = true;
 		m_bHavePlayedGhostEquipSound = false;
@@ -217,15 +125,6 @@ void CWeaponGhost::ItemHolsterFrame(void)
 #endif
 }
 
-void CWeaponGhost::SetShowEnemies(bool enabled)
-{
-#ifdef GAME_DLL
-	m_bShouldShowEnemies.GetForModify() = enabled;
-#else
-	m_bShouldShowEnemies = enabled;
-#endif
-}
-
 enum {
 	NEO_GHOST_ONLY_ENEMIES = 0,
 	NEO_GHOST_ONLY_PLAYABLE_TEAMS,
@@ -237,186 +136,6 @@ ConVar neo_ghost_debug_spew("neo_ghost_debug_spew", "0", FCVAR_CHEAT | FCVAR_REP
 	"Whether to spew debug logs to console about ghosting positions and the data PVS/server origin.", true, 0.0, true, 1.0);
 ConVar neo_ghost_debug_hudinfo("neo_ghost_debug_hudinfo", "0", FCVAR_CHEAT | FCVAR_REPLICATED,
 	"Whether to overlay debug text information to screen about ghosting targets.", true, 0.0, true, 1.0);
-
-#ifdef CLIENT_DLL
-void CWeaponGhost::HideEnemies(void)
-{
-	for (int i = 1; i <= gpGlobals->maxClients; i++)
-	{
-		HideBeacon(i);
-	}
-}
-
-float CWeaponGhost::ShowEnemies(void)
-{
-	C_NEO_Player *player = (C_NEO_Player*)GetOwner();
-	if (!player)
-	{
-		return 0;
-	}
-
-	float closestDistance = 1000;
-
-	for (int i = 1; i <= gpGlobals->maxClients; i++)
-	{
-		HideBeacon(i);
-
-		auto otherPlayer = ToBasePlayer( ClientEntityList().GetEnt( i ) );
-
-		// Only ghost valid clients that aren't ourselves
-		if (!otherPlayer || otherPlayer == player || otherPlayer->IsPlayerDead() || otherPlayer->IsHLTV())
-		{
-			continue;
-		}
-
-		if (otherPlayer->GetTeamNumber() != TEAM_JINRAI && otherPlayer->GetTeamNumber() != TEAM_NSF)
-		{
-			// We don't want to ghost spectators or unassigned players
-			if (neo_ghost_debug_ignore_teams.GetInt() < NEO_GHOST_ANY_TEAMS)
-			{
-				continue;
-			}
-		}
-
-		if (player->GetTeamNumber() == otherPlayer->GetTeamNumber())
-		{
-			// We don't want to ghost our own team
-			if (neo_ghost_debug_ignore_teams.GetInt() < NEO_GHOST_ONLY_PLAYABLE_TEAMS)
-			{
-				continue;
-			}
-		}
-
-		const bool isInPVS = otherPlayer->IsVisible();
-
-		ShowBeacon(i, otherPlayer->GetAbsOrigin());
-
-		if (neo_ghost_debug_spew.GetBool())
-		{
-			DevMsg("Ghosting enemy from my PVS: %f %f %f\n",
-				otherPlayer->GetAbsOrigin().x,
-				otherPlayer->GetAbsOrigin().y,
-				otherPlayer->GetAbsOrigin().z);
-		}
-			
-		if (neo_ghost_debug_hudinfo.GetBool())
-		{
-			Debug_ShowPos(otherPlayer->GetAbsOrigin(), isInPVS);
-		}
-
-		const float distance = (player->GetAbsOrigin().DistTo(otherPlayer->GetAbsOrigin()) / METERS_PER_INCH / 1000.0f);
-		if (distance < closestDistance)
-		{
-			closestDistance = distance;
-		}
-	}
-
-	return closestDistance == 1000 ? -1 : closestDistance;
-}
-
-void CWeaponGhost::HideBeacon(int clientIndex)
-{
-	m_pGhostBeacons[clientIndex]->SetVisible(false);
-}
-
-using vgui::surface;
-
-extern ConVar neo_ghost_beacon_scale_baseline;
-
-void CWeaponGhost::ShowBeacon(int clientIndex, const Vector &pos)
-{
-	if (!m_pGhostBeacons[clientIndex])
-	{
-		Assert(false);
-		return;
-	}
-
-	auto maxDistInHammerUnits = GetGhostRangeInHammerUnits();
-	const auto distance = DistanceToPlayer(GetOwner()->EyePosition(), pos);
-
-	const float scaling = clamp((distance / maxDistInHammerUnits),
-		0.25f * neo_ghost_beacon_scale_baseline.GetFloat(),
-		0.75f * neo_ghost_beacon_scale_baseline.GetFloat());
-	
-#if(0)
-	DevMsg("Dist was: %.1f meters; beacon texture scaling: %f\n",
-		distMeters, scaling);
-#endif
-
-	const int heightOffset = 32;
-	Vector temp(pos.x, pos.y, pos.z + heightOffset);
-	int x, y;
-	GetVectorInScreenSpace(temp, x, y); // this is pixels from top-left
-
-	m_pGhostBeacons[clientIndex]->SetGhostTargetPos(x, y, scaling, (distance / METERS_PER_INCH) / 1000.0f);
-	m_pGhostBeacons[clientIndex]->SetVisible(true);
-}
-
-void CWeaponGhost::Debug_ShowPos(const Vector &pos, bool pvs)
-{
-	int x, y;
-	GetVectorInScreenSpace(pos, x, y);
-
-	// Whether target originated from client PVS or was sent by server
-	if (pvs)
-	{
-		debugoverlay->AddTextOverlay(pos, gpGlobals->frametime, "GHOST TARGET (PVS)");
-	}
-	else
-	{
-		debugoverlay->AddTextOverlay(pos, gpGlobals->frametime, "GHOST TARGET (SERVER)");
-	}
-}
-#endif
-
-#ifdef GAME_DLL
-// Purpose: Send enemy player locations to clients for ghost usage outside their PVS.
-//
-// NEO TODO/FIXME (Rain): This stuff will get networked once per ghost;
-// this can be inefficient in the unlikely event of multiple ghosts at play at once.
-void CWeaponGhost::UpdateNetworkedEnemyLocations(void)
-{
-	const int pvsMaxSize = (engine->GetClusterCount() / 8) + 1;
-	Assert(pvsMaxSize > 0);
-	// NEO HACK/FIXME (Rain): we should stack allocate instead
-	unsigned char *pvs = new unsigned char[pvsMaxSize];
-
-	CNEO_Player *player = (CNEO_Player*)GetOwner();
-	if (!player)
-	{
-		delete[] pvs;
-		return;
-	}
-
-	const int cluster = engine->GetClusterForOrigin(player->GetAbsOrigin());
-	const int pvsSize = engine->GetPVSForCluster(cluster, pvsMaxSize, pvs);
-	Assert(pvsSize > 0);
-
-	for (int i = 1; i <= gpGlobals->maxClients; i++)
-	{
-		CNEO_Player *otherPlayer = (CNEO_Player*)UTIL_PlayerByIndex(i);
-
-		// We're only interested in valid players that aren't the ghost owner.
-		if (!otherPlayer || otherPlayer == player)
-		{
-			continue;
-		}
-
-		// If the other player is already in ghoster's PVS, we can skip them.
-		else if (engine->CheckOriginInPVS(otherPlayer->GetAbsOrigin(), pvs, pvsSize))
-		{
-			continue;
-		}
-
-		vec_t absPos[3] = { otherPlayer->GetAbsOrigin().x, otherPlayer->GetAbsOrigin().y, otherPlayer->GetAbsOrigin().z };
-
-		m_rvPlayerPositions.Set(i, otherPlayer->GetAbsOrigin());
-		m_rvPlayerPositions.GetForModify(i).CopyToArray(absPos);
-	}
-
-	delete[] pvs;
-}
-#endif
 
 void CWeaponGhost::OnPickedUp(CBaseCombatCharacter *pNewOwner)
 {
@@ -443,9 +162,13 @@ void CWeaponGhost::OnPickedUp(CBaseCombatCharacter *pNewOwner)
 	}
 }
 
-float CWeaponGhost::DistanceToPlayer(const Vector& ghosterPos, const Vector& otherPlayerPos)
+float CWeaponGhost::DistanceToPos(const Vector& otherPlayerPos)
 {
-	const auto dir = ghosterPos - otherPlayerPos;
+	auto owner = GetOwner();
+	if(!owner)
+		return false;
+	
+	const auto dir = owner->EyePosition() - otherPlayerPos;
 	return dir.Length2D();
 }
 
@@ -453,4 +176,16 @@ float CWeaponGhost::GetGhostRangeInHammerUnits() const
 {
 	const float maxGhostRangeMeters = cl_neo_ghost_view_distance.GetFloat();
 	return (maxGhostRangeMeters / METERS_PER_INCH);
+}
+
+bool CWeaponGhost::IsPosWithinViewDistance(const Vector& otherPlayerPos)
+{
+	float dist;
+	return IsPosWithinViewDistance(otherPlayerPos, dist);
+}
+
+bool CWeaponGhost::IsPosWithinViewDistance(const Vector& otherPlayerPos, float& dist)
+{
+	dist = DistanceToPos(otherPlayerPos);
+	return dist <= GetGhostRangeInHammerUnits();
 }

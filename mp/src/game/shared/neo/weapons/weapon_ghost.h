@@ -13,10 +13,6 @@
 #define CNEO_Player C_NEO_Player
 #endif
 
-#ifdef CLIENT_DLL
-class CNEOHud_GhostBeacon;
-#endif
-
 class CNEO_Player;
 
 class CWeaponGhost : public CNEOBaseCombatWeapon
@@ -28,13 +24,10 @@ public:
 
 #ifdef GAME_DLL
 	DECLARE_ACTTABLE();
-	DECLARE_DATADESC();
 #endif
 
 	CWeaponGhost(void);
-	virtual ~CWeaponGhost(void);
-
-	void ItemPreFrame(void);
+	
 	virtual void PrimaryAttack(void) OVERRIDE { }
 	virtual void SecondaryAttack(void) OVERRIDE { }
 
@@ -47,44 +40,26 @@ public:
 
 	virtual float GetSpeedScale(void) const { return 1.0; }
 	float GetGhostRangeInHammerUnits() const;
-	bool IsPosWithinViewDistance(const Vector &otherPlayerPos) const;
-
-private:
-	void ZeroGhostedPlayerLocArray(void);
-	void ShowBeacon(int clientIndex, const Vector &pos);
-	void HideBeacon(int clientIndex);
-	void SetShowEnemies(bool enabled);
+	bool IsPosWithinViewDistance(const Vector &otherPlayerPos);
+	bool IsPosWithinViewDistance(const Vector &otherPlayerPos, float &dist);
+	float DistanceToPos(const Vector& otherPlayerPos);
 
 #ifdef CLIENT_DLL
-	float ShowEnemies(void);
-	void HideEnemies(void);
-	void Debug_ShowPos(const Vector &pos, bool pvs);
 	void PlayGhostSound(float volume = 1.0f);
 	void StopGhostSound(void);
 	void HandleGhostEquip(void);
 
 	void TryGhostPing(float closestEnemy);
-#else
-	void UpdateNetworkedEnemyLocations(void);
 #endif
 
 private:
-	static float DistanceToPlayer(const Vector& ghosterPos, const Vector& otherPlayerPos);
 
 #ifdef CLIENT_DLL
 	bool m_bHavePlayedGhostEquipSound;
 	bool m_bHaveHolsteredTheGhost;
 
 	float m_flLastGhostBeepTime;
-
-	// NEO TODO (Rain): It's probably better to just have one beacon,
-	// and call it numplayers times on each update between hud buffer swaps
-	CNEOHud_GhostBeacon *m_pGhostBeacons[MAX_PLAYERS];
-#else
-	
 #endif
-	CNetworkVar(bool, m_bShouldShowEnemies);
-	CNetworkArray(Vector, m_rvPlayerPositions, MAX_PLAYERS);
 
 	CWeaponGhost(const CWeaponGhost &other);
 };
