@@ -19,8 +19,8 @@ using vgui::surface;
 // NEO HACK (Rain): This is a sort of magic number to help with screenspace hud elements
 // scaling in world space. There's most likely some nicer and less confusing way to do this.
 // Check which files make reference to this, if you decide to tweak it.
-ConVar neo_ghost_beacon_scale_baseline("neo_ghost_beacon_scale_baseline", "0.65", FCVAR_USERINFO,
-	"Scale baseline for the HUD ghost beacons.", true, 0, true, 10);
+ConVar neo_ghost_beacon_scale_baseline("neo_ghost_beacon_scale_baseline", "150", FCVAR_USERINFO,
+	"Distance in HU where ghost marker is same size as player.", true, 0, true, 9999);
 
 ConVar neo_ghost_beacon_alpha("neo_ghost_beacon_alpha", "150", FCVAR_USERINFO,
 	"Alpha channel transparency of HUD ghost beacons.", true, 0, true, 255);
@@ -152,20 +152,17 @@ void CNEOHud_GhostBeacons::DrawPlayer(const Vector& playerPos) const
 	surface()->DrawSetColor(beaconColor);
 	surface()->DrawSetTexture(m_hTex);
 
-	// This is kind of awful, see the cvar comments for details.
-	float hackyScale = (neo_ghost_beacon_scale_baseline.GetFloat());
-	const float distScale = clamp(dist / m_pGhost->GetGhostRangeInHammerUnits(), 0.25f, 0.75f);
-	hackyScale = hackyScale * distScale;
+	float scale = neo_ghost_beacon_scale_baseline.GetInt() / dist;
 
 	// Offset screen space starting positions by half of the texture x/y coords,
 	// so it starts centered on target.
-	const int posfix_X = posX - ((m_beaconTexWidth / 2) * hackyScale);
-	const int posfix_Y = posY - (m_beaconTexHeight * hackyScale);
+	const int posfix_X = posX - ((m_beaconTexWidth / 2) * scale);
+	const int posfix_Y = posY - (m_beaconTexHeight * scale);
 
 	// End coordinates according to art size (and our distance scaling)
 	surface()->DrawTexturedRect(
 		posfix_X,
 		posfix_Y,
-		posfix_X + (m_beaconTexWidth * hackyScale),
-		posfix_Y + (m_beaconTexHeight * hackyScale));
+		posfix_X + (m_beaconTexWidth * scale),
+		posfix_Y + (m_beaconTexHeight * scale));
 }
