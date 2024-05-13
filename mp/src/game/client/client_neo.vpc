@@ -178,6 +178,9 @@ $Project "Client (HL2MP)"
 
 				$File	"neo\ui\neo_hud_health_thermoptic_aux.cpp"
 				$File	"neo\ui\neo_hud_health_thermoptic_aux.h"
+				
+				$File   "neo\ui\neo_hud_worldpos_marker.cpp"
+				$File   "neo\ui\neo_hud_worldpos_marker.h"
 
 			}
 

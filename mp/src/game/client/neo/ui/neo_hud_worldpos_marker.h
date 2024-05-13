@@ -19,7 +19,7 @@ public:
     CNEOHud_WorldPosMarker(const char* pElementName, vgui::Panel* parent);
     virtual ~CNEOHud_WorldPosMarker() { }
 
-    void ApplySchemeSettings(vgui::IScheme* pScheme) override;    
+    void ApplySchemeSettings(vgui::IScheme* pScheme) OVERRIDE;    
 
 protected:
     int m_viewWidth, m_viewHeight;
