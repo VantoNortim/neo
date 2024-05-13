@@ -168,9 +168,14 @@ void CNEOHud_FriendlyMarker::DrawPlayer(Color teamColor, C_BasePlayer* player) c
 	{
 		auto n = dynamic_cast<C_NEO_Player*>(player);
 		auto a = n->m_rvFriendlyPlayerPositions;
-		wchar_t playerNameUnicode[32 + 1];
+		constexpr int maxNameLenght = 32 + 1;		
 		auto playerName = player->GetPlayerName();
-		g_pVGuiLocalize->ConvertANSIToUnicode(player->GetPlayerName(), playerNameUnicode, sizeof(playerNameUnicode));
+
+		wchar_t playerNameUnicode[maxNameLenght];
+		char playerNameTrimmed[maxNameLenght];
+		snprintf(playerNameTrimmed, maxNameLenght, "%s", playerName);
+		auto textLen = V_strlen(playerNameTrimmed);
+		g_pVGuiLocalize->ConvertANSIToUnicode(playerNameTrimmed, playerNameUnicode, sizeof(playerNameUnicode));
 
 		auto fadeTextMultiplier = GetFadeValueTowardsScreenCentreInAndOut(x, y, 0.05);
 		if(fadeTextMultiplier > 0.001)
@@ -180,7 +185,7 @@ void CNEOHud_FriendlyMarker::DrawPlayer(Color teamColor, C_BasePlayer* player) c
 			int textWidth, textHeight;
 			surface()->GetTextSize(m_hFont, playerNameUnicode, textWidth, textHeight);
 			surface()->DrawSetTextPos(x - (textWidth / 2), y + m_iMarkerHeight);
-			surface()->DrawPrintText(playerNameUnicode, min(sizeof(playerName),32));
+			surface()->DrawPrintText(playerNameUnicode, textLen);
 		}
 			
 		auto fadeMarkerMultiplier = GetFadeValueTowardsScreenCentreInverted(x, y, 0.05);
